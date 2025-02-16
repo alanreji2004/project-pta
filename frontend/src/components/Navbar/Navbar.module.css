@@ -1,0 +1,105 @@
+@import url('https://fonts.googleapis.com/css2?family=Cabin:ital,wght@0,400..700;1,400..700&display=swap');
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background-color: white;
+    font-family: "Cabin", serif;
+  font-optical-sizing: auto;
+    /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
+  }
+  
+  .logoContainer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .logo {
+    height: 50px;
+  }
+  
+  .titleContainer {
+    display: flex;
+    flex-direction: column;
+
+  }
+  
+  .title {
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
+  .subtitle {
+    font-size: 14px;
+    color: gray;
+  }
+  
+  .established {
+    font-size: 14px;
+  }
+  
+  .govt {
+    color: red;
+    font-weight: bold;
+  }
+  
+  .menuContainer {
+    position: relative;
+  }
+  
+  .menuButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: none;
+  }
+  
+  .menu {
+    display: flex;
+    gap: 20px;
+    list-style: none;
+    font-weight: 100px;
+  }
+  
+  .menuItem {
+    text-decoration: none;
+    font-size: 16px;
+    color: black;
+    transition: color 0.3s ease;
+  }
+  
+  .menuItem:hover {
+    color: #6200ea;
+  }
+
+
+  @media (max-width: 768px) {
+    .menuButton {
+      display: block;
+    }
+  
+    .menu {
+      display: none;
+      position: absolute;
+      top: 50px;
+      right: 0;
+      background: white;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      flex-direction: column;
+      width: 200px;
+      padding: 10px;
+      border-radius: 5px;
+    }
+  
+    .menu.showMenu {
+      display: flex;
+    }
+  
+    .menuItem {
+      padding: 10px;
+      display: block;
+    }
+  }
+  
