@@ -28,7 +28,7 @@ export default function Navbar() {
         <ul className={`${styles.menu} ${isOpen ? styles.showMenu : ""}`} style={{ marginTop: isOpen ? '10px' : '0' }}>
           <li><Link to="/" className={styles.menuItem} onClick={toggleMenu}>Home</Link></li>
           <li><Link to="/viewordownload" className={styles.menuItem} onClick={toggleMenu}>View/Download list</Link></li>
-          <li><Link to="/addorchange" className={styles.menuItem} onClick={toggleMenu}>Settings</Link></li>
+          <li><Link to="/settings" className={styles.menuItem} onClick={toggleMenu}>Settings</Link></li>
           <li><Link to="/login" className={styles.menuItem} onClick={toggleMenu}>Logout</Link></li>
         </ul>
       </div>

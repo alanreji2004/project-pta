@@ -45,8 +45,8 @@
     cursor: pointer;
   }
   .button:hover{
-    background-color: #f14141;
-    transition: background-color 0.5s ease-in-out;
+    background-color: #cc2121;
+    transition: background-color 0.2s ease-in-out;
   }
   .saveButton {
     width: 100%;
@@ -54,8 +54,8 @@
     background-color: #ff5050;
   }
   .saveButton:hover{
-    background-color: #f14141;
-    transition: background-color 0.5s ease-in-out;
+    background-color: #cc2121;
+    transition: background-color 0.2s ease-in-out;
   }
   
   .checkboxLabel {

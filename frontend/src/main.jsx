@@ -8,6 +8,8 @@ import {
   Link,
 } from "react-router-dom";
 import Login from "./pages/Login/Login";
+import Settings from "./pages/Settings/Settings";
+import List from "./pages/List/List";
 
 const router = createBrowserRouter([
   {
@@ -17,6 +19,14 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <Login />,
+  },
+  {
+    path: "/settings",
+    element: <Settings />,
+  },
+  {
+    path: "/viewordownload",
+    element: <List />,
   },
 ]);
 
