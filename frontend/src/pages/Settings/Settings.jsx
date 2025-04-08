@@ -134,7 +134,7 @@ const Settings = () => {
       <div className={styles.settingsContainer}>
         <div className={styles.content}>
           <h2>Add/Edit Routes and Boarding points</h2>
-          <Link to="/busroutes">
+          <Link to="/boardingpoints">
           <button className={styles.busButton}>
             Go To Page
           </button>

@@ -10,7 +10,7 @@ import {
 import Login from "./pages/Login/Login";
 import Settings from "./pages/Settings/Settings";
 import List from "./pages/List/List";
-import BusRoutes from "./pages/BusRoutes/BusRoutes";
+import BoardingPoints from "./pages/BoardingPoints/BoardingPoints";
 
 const router = createBrowserRouter([
   {
@@ -30,8 +30,8 @@ const router = createBrowserRouter([
     element: <List />,
   },
   {
-    path: "/busroutes",
-    element: <BusRoutes />,
+    path: "/boardingpoints",
+    element: <BoardingPoints />,
   },
 ]);
 

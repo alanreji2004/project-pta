@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import styles from './BusRoutes.module.css';
+import styles from './BoardingPoints.module.css';
 import Navbar from '../../components/Navbar/Navbar';
 import { db } from '../../firebase';
 import { collection, addDoc, onSnapshot, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
@@ -8,7 +8,7 @@ import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-const BusRoutes = () => {
+const BoardingPoints = () => {
   const [formData, setFormData] = useState({ code: '', name: '', fare: '' });
   const [boardingPoints, setBoardingPoints] = useState([]);
   const [error, setError] = useState('');
@@ -188,4 +188,4 @@ const BusRoutes = () => {
   );
 };
 
-export default BusRoutes;
+export default BoardingPoints;
