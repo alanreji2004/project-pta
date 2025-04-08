@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import styles from './BusRoutes.module.css';
 import Navbar from '../../components/Navbar/Navbar';
 import { db } from '../../firebase';
-import { collection, addDoc, onSnapshot, query, where, getDocs } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
 
 const BusRoutes = () => {
   const [formData, setFormData] = useState({ code: '', name: '', fare: '' });
   const [boardingPoints, setBoardingPoints] = useState([]);
   const [error, setError] = useState('');
+  const [editModal, setEditModal] = useState(false);
+  const [editData, setEditData] = useState({ id: '', code: '', name: '', fare: '' });
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, 'boardingpoints'), (snapshot) => {
@@ -50,6 +52,20 @@ const BusRoutes = () => {
 
       setFormData({ code: '', name: '', fare: '' });
     }
+  };
+
+  const openEditModal = (point) => {
+    setEditData({ id: point.id, code: point.code, name: point.name, fare: point.fare });
+    setEditModal(true);
+  };
+
+  const handleEditSubmit = async () => {
+    const docRef = doc(db, 'boardingpoints', editData.id);
+    await updateDoc(docRef, {
+      name: editData.name.trim().toUpperCase(),
+      fare: editData.fare
+    });
+    setEditModal(false);
   };
 
   return (
@@ -95,16 +111,50 @@ const BusRoutes = () => {
             <div>Code</div>
             <div>Name</div>
             <div>Fare</div>
+            <div>Edit</div>
           </div>
           {boardingPoints.map((point) => (
             <div key={point.id} className={styles.tableRow}>
               <div>{point.code}</div>
               <div>{point.name}</div>
               <div>₹{point.fare}</div>
+              <div>
+                <button className={styles.editButton} onClick={() => openEditModal(point)}>Edit</button>
+              </div>
             </div>
           ))}
         </div>
       </div>
+
+      {editModal && (
+        <div className={styles.modalBackdrop}>
+          <div className={styles.modal}>
+            <h3 className={styles.modalTitle}>Edit Boarding Point</h3>
+            <input
+              type="text"
+              value={editData.code}
+              disabled
+              className={styles.input}
+            />
+            <input
+              type="text"
+              value={editData.name}
+              onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+              className={styles.input}
+            />
+            <input
+              type="number"
+              value={editData.fare}
+              onChange={(e) => setEditData({ ...editData, fare: e.target.value })}
+              className={styles.input}
+            />
+            <div className={styles.modalActions}>
+              <button className={styles.submitButton} onClick={handleEditSubmit}>Save</button>
+              <button className={styles.cancelButton} onClick={() => setEditModal(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

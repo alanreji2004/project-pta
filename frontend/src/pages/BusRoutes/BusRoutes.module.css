@@ -114,7 +114,7 @@
   .tableHeader,
   .tableRow {
     display: grid;
-    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-columns: 1fr 2fr 1fr 0.5fr;
     padding: 1rem;
     font-size: 15px;
   }
@@ -139,7 +139,7 @@
   @media (max-width: 768px) {
     .tableHeader,
     .tableRow {
-      grid-template-columns: 1fr 1.5fr 1fr;
+      grid-template-columns: 1fr 1.5fr 1fr 0.5fr;
       font-size: 14px;
       padding: 0.8rem;
     }
@@ -153,5 +153,81 @@
     font-size: 14px;
     margin-top: 0.5rem;
     text-align: center;
+  }
+  .modalBackdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(100, 100, 100, 0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+  }
+  
+  .modal {
+    background-color: #f9f9f9;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+  }
+  
+  .modalTitle {
+    color: #222;
+    margin-bottom: 1.2rem;
+    font-size: 1.2rem;
+    text-align: center;
+    font-weight: 500;
+  }
+  
+  .modalInput {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    color: #333;
+    background-color: white;
+  }
+  
+  .modalActions {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  
+  .editButton {
+    background-color: transparent;
+    border: 1px solid #444;
+    color: #444;
+    padding: 0.4rem 1rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .editButton:hover {
+    background-color: #eaeaea;
+  }
+  
+  .cancelButton {
+    background-color: transparent;
+    border: 1px solid #999;
+    color: #999;
+    padding: 0.4rem 1rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .cancelButton:hover {
+    background-color: #f0f0f0;
   }
   
