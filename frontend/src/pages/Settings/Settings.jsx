@@ -147,10 +147,10 @@ const Settings = () => {
           </button>
         </div>
         <div className={styles.content}>
-          <h2>Promote Students</h2>
+          <h2>Promote to next Semester</h2>
           <button
             className={styles.promoteButton}
-            onClick={() => confirmAction(handlePromoteStudents, 'Are you sure you want to promote all students?', 'promote')}
+            onClick={() => confirmAction(handlePromoteStudents, 'Are you sure you want to promote all students?This action cannot be undone. ', 'promote')}
             disabled={loading.promote}
           >
             {loading.promote ? `Promoting... ${progress.promote || 0}%` : 'Promote All'}
@@ -160,7 +160,7 @@ const Settings = () => {
           <h2>Delete All Rows</h2>
           <button
             className={styles.deleteButton}
-            onClick={() => confirmAction(handleDeleteAll, 'Are you sure you want to delete all rows?', 'delete')}
+            onClick={() => confirmAction(handleDeleteAll, 'Are you sure you want to delete all rows?This action cannot be undone.', 'delete')}
             disabled={loading.delete}
           >
             {loading.delete ? `Deleting... ${progress.delete || 0}%` : 'Delete All Rows'}
