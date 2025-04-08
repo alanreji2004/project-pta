@@ -1,20 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './BusRoutes.module.css';
 import Navbar from '../../components/Navbar/Navbar';
 import { db } from '../../firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, query, where, getDocs } from 'firebase/firestore';
 
 const BusRoutes = () => {
   const [formData, setFormData] = useState({ code: '', name: '', fare: '' });
+  const [boardingPoints, setBoardingPoints] = useState([]);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'boardingpoints'), (snapshot) => {
+      const data = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setBoardingPoints(data);
+    });
+    return () => unsub();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (formData.code && formData.name && formData.fare) {
+    setError('');
+    const codeUpper = formData.code.trim().toUpperCase();
+    const nameUpper = formData.name.trim().toUpperCase();
+    const fare = formData.fare;
+
+    if (codeUpper && nameUpper && fare) {
+      const qCode = query(collection(db, 'boardingpoints'), where('code', '==', codeUpper));
+      const qName = query(collection(db, 'boardingpoints'), where('name', '==', nameUpper));
+      const [codeSnap, nameSnap] = await Promise.all([getDocs(qCode), getDocs(qName)]);
+
+      if (!codeSnap.empty) {
+        setError('Code is already in use.');
+        return;
+      }
+
+      if (!nameSnap.empty) {
+        setError('Boarding point already entered.');
+        return;
+      }
+
       await addDoc(collection(db, 'boardingpoints'), {
-        code: formData.code,
-        name: formData.name,
-        fare: formData.fare,
+        code: codeUpper,
+        name: nameUpper,
+        fare
       });
+
       setFormData({ code: '', name: '', fare: '' });
     }
   };
@@ -22,6 +55,7 @@ const BusRoutes = () => {
   return (
     <div className={styles.pageContainer}>
       <Navbar />
+
       <div className={styles.addBoardingPoint}>
         <h2 className={styles.sectionTitle}>Add Boarding Point</h2>
         <form onSubmit={handleSubmit} className={styles.inputGroup}>
@@ -51,6 +85,25 @@ const BusRoutes = () => {
           />
           <button type="submit" className={styles.submitButton}>Submit</button>
         </form>
+        {error && <p className={styles.errorText}>{error}</p>}
+      </div>
+
+      <div className={styles.tableSection}>
+        <h2 className={styles.sectionTitle}>All Boarding Points</h2>
+        <div className={styles.tableContainer}>
+          <div className={styles.tableHeader}>
+            <div>Code</div>
+            <div>Name</div>
+            <div>Fare</div>
+          </div>
+          {boardingPoints.map((point) => (
+            <div key={point.id} className={styles.tableRow}>
+              <div>{point.code}</div>
+              <div>{point.name}</div>
+              <div>₹{point.fare}</div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
