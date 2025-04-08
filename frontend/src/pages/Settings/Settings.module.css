@@ -78,6 +78,73 @@ input[type="radio"] {
   color: #ffa500;
   text-align: center;
 }
+.progressBar {
+  height: 10px;
+  width: 100%;
+  background-color: #222;
+  border-radius: 10px;
+  margin-top: 1.5rem;
+  overflow: hidden;
+  box-shadow: inset 0 0 8px #111;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff6600, #ffaa00);
+  transition: width 0.3s ease-in-out;
+  border-radius: 10px 0 0 10px;
+}
+
+.successBox {
+  position: fixed;
+  bottom: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #1a1a1a;
+  color: #ff9900;
+  padding: 1rem 2rem;
+  border-radius: 1.5rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  z-index: 9999;
+  animation: slideUp 0.5s ease-out forwards, fadeOut 1s ease-in 4s forwards;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 0 25px rgba(255, 102, 0, 0.35);
+  text-align: center;
+}
+
+.arrow {
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 14px solid #ff9900;
+  transform: rotate(180deg);
+  animation: bounce 1.2s infinite ease-in-out;
+}
+
+@keyframes slideUp {
+  to {
+    bottom: 40px;
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: rotate(180deg) translateY(0);
+  }
+  50% {
+    transform: rotate(180deg) translateY(-6px);
+  }
+}
 
 @media (max-width: 600px) {
   .settingsContainer {
