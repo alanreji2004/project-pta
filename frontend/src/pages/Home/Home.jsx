@@ -70,7 +70,9 @@ const Home = () => {
 
   return (
     <div className={styles.container}>
-      <Navbar />
+      <div className={styles.navbar}>
+      <Navbar /> 
+      </div>
       <div className={styles.content}>
         <h2>Enter Student Details</h2>
         <div className={styles.formContainer}>
