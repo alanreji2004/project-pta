@@ -10,6 +10,7 @@ import {
 import Login from "./pages/Login/Login";
 import Settings from "./pages/Settings/Settings";
 import List from "./pages/List/List";
+import BusRoutes from "./pages/BusRoutes/BusRoutes";
 
 const router = createBrowserRouter([
   {
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
   {
     path: "/viewordownload",
     element: <List />,
+  },
+  {
+    path: "/busroutes",
+    element: <BusRoutes />,
   },
 ]);
 

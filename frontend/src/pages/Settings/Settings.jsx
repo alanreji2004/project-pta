@@ -11,6 +11,8 @@ import {
 import { db } from '../../firebase';
 import Navbar from '../../components/Navbar/Navbar';
 import styles from './Settings.module.css';
+import { Link } from "react-router-dom";
+
 
 const Settings = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -130,6 +132,14 @@ const Settings = () => {
     <div>
       <Navbar />
       <div className={styles.settingsContainer}>
+        <div className={styles.content}>
+          <h2>Add/Edit Routes and Boarding points</h2>
+          <Link to="/busroutes">
+          <button className={styles.busButton}>
+            Go To Page
+          </button>
+          </Link>
+        </div>
         <div className={styles.content}>
           <h2>Add Student Details</h2>
           <input
