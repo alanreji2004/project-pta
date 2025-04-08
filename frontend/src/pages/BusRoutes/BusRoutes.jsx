@@ -87,7 +87,7 @@ const BusRoutes = () => {
     doc.text('Boarding Points', 14, 15);
     autoTable(doc, {
       head: [['Code', 'Name', 'Fare']],
-      body: boardingPoints.map(point => [point.code, point.name, `₹${point.fare}`]),
+      body: boardingPoints.map(point => [point.code, point.name, point.fare]),
       startY: 20
     });
     doc.save('BoardingPoints.pdf');
