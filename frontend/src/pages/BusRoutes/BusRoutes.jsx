@@ -3,6 +3,10 @@ import styles from './BusRoutes.module.css';
 import Navbar from '../../components/Navbar/Navbar';
 import { db } from '../../firebase';
 import { collection, addDoc, onSnapshot, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { FiEdit2 } from 'react-icons/fi';
+import { saveAs } from 'file-saver';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const BusRoutes = () => {
   const [formData, setFormData] = useState({ code: '', name: '', fare: '' });
@@ -68,6 +72,27 @@ const BusRoutes = () => {
     setEditModal(false);
   };
 
+  const downloadCSV = () => {
+    const csv = [
+      ['Code', 'Name', 'Fare'],
+      ...boardingPoints.map(point => [point.code, point.name, point.fare])
+    ].map(row => row.join(',')).join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    saveAs(blob, 'BoardingPoints.csv');
+  };
+
+  const downloadPDF = () => {
+    const doc = new jsPDF();
+    doc.text('Boarding Points', 14, 15);
+    autoTable(doc, {
+      head: [['Code', 'Name', 'Fare']],
+      body: boardingPoints.map(point => [point.code, point.name, `₹${point.fare}`]),
+      startY: 20
+    });
+    doc.save('BoardingPoints.pdf');
+  };
+
   return (
     <div className={styles.pageContainer}>
       <Navbar />
@@ -118,11 +143,18 @@ const BusRoutes = () => {
               <div>{point.code}</div>
               <div>{point.name}</div>
               <div>₹{point.fare}</div>
-              <div>
-                <button className={styles.editButton} onClick={() => openEditModal(point)}>Edit</button>
+              <div className={styles.editIconWrapper}>
+                <button className={styles.editButton} onClick={() => openEditModal(point)}>
+                  <FiEdit2 size={16} />
+                </button>
               </div>
             </div>
           ))}
+        </div>
+
+        <div className={styles.downloadButtons}>
+          <button className={styles.downloadButton} onClick={downloadCSV}>Download CSV</button>
+          <button className={styles.downloadButton} onClick={downloadPDF}>Download PDF</button>
         </div>
       </div>
 
@@ -130,12 +162,7 @@ const BusRoutes = () => {
         <div className={styles.modalBackdrop}>
           <div className={styles.modal}>
             <h3 className={styles.modalTitle}>Edit Boarding Point</h3>
-            <input
-              type="text"
-              value={editData.code}
-              disabled
-              className={styles.input}
-            />
+            <input type="text" value={editData.code} disabled className={styles.input} />
             <input
               type="text"
               value={editData.name}
