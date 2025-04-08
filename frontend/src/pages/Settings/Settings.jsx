@@ -1,15 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import * as XLSX from 'xlsx';
+import {
+  collection,
+  getDocs,
+  addDoc,
+  deleteDoc,
+  doc,
+  setDoc,
+} from 'firebase/firestore';
 import { db } from '../../firebase';
-import { collection, addDoc, deleteDoc, doc, setDoc, getDocs } from 'firebase/firestore';
 import Navbar from '../../components/Navbar/Navbar';
 import styles from './Settings.module.css';
 
 const Settings = () => {
   const [selectedFile, setSelectedFile] = useState(null);
-  const [operation, setOperation] = useState('add');
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [progress, setProgress] = useState({});
+  const [loading, setLoading] = useState({});
   const [showSuccessBox, setShowSuccessBox] = useState(false);
+  const [confirmation, setConfirmation] = useState({ visible: false, action: null, message: '', actionKey: '' });
 
   const readExcel = async (file) => {
     const data = await file.arrayBuffer();
@@ -18,111 +26,246 @@ const Settings = () => {
     return XLSX.utils.sheet_to_json(worksheet);
   };
 
-  const uploadData = async (data) => {
-    try {
-      const studentsRef = collection(db, 'students');
-      if (operation === 'delete') {
-        const existingDocs = await getDocs(studentsRef);
-        for (const docSnap of existingDocs.docs) {
-          await deleteDoc(doc(db, 'students', docSnap.id));
-        }
-      }
-
-      let count = 0;
-      const total = data.length;
-
-      for (const item of data) {
-        const { Admissionnumber, Name, Department, Semester } = item;
-        if (!Admissionnumber || !Name || !Department || !Semester) continue;
-
-        if (operation === 'replace') {
-          const existingDocs = await getDocs(studentsRef);
-          let found = false;
-          for (const docSnap of existingDocs.docs) {
-            if (docSnap.data().Admissionnumber === Admissionnumber) {
-              await setDoc(doc(db, 'students', docSnap.id), { Admissionnumber, Name, Department, Semester });
-              found = true;
-              break;
-            }
-          }
-          if (!found) {
-            await addDoc(studentsRef, { Admissionnumber, Name, Department, Semester });
-          }
-        } else {
-          await addDoc(studentsRef, { Admissionnumber, Name, Department, Semester });
-        }
-
-        count++;
-        setUploadProgress(Math.round((count / total) * 100));
-      }
-
-      setShowSuccessBox(true);
-      setTimeout(() => setShowSuccessBox(false), 5000);
-    } catch (error) {
-      console.error(error);
-    }
+  const showSuccess = () => {
+    setShowSuccessBox(true);
+    setTimeout(() => setShowSuccessBox(false), 3000);
   };
 
-  const handleUpload = async () => {
+  const confirmAction = (action, message, actionKey) => {
+    setConfirmation({ visible: true, action, message, actionKey });
+  };
+
+  const executeConfirmedAction = async () => {
+    const { action, actionKey } = confirmation;
+    setConfirmation({ visible: false, action: null, message: '', actionKey: '' });
+    if (action) await action(actionKey);
+  };
+
+  const updateLoading = (key, value) => {
+    setLoading((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const updateProgress = (key, value) => {
+    setProgress((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleAddNewFile = async (key) => {
     if (!selectedFile) return;
-    setUploadProgress(0);
+    updateLoading(key, true);
+    updateProgress(key, 0);
+
     const data = await readExcel(selectedFile);
-    await uploadData(data);
+    const total = data.length;
+    let count = 0;
+
+    for (const item of data) {
+      const { Admissionnumber, Name, Department, Semester } = item;
+      if (!Admissionnumber || !Name || !Department || !Semester) continue;
+
+      await addDoc(collection(db, 'students'), {
+        Admissionnumber,
+        Name,
+        Department,
+        Semester,
+      });
+
+      count++;
+      updateProgress(key, Math.round((count / total) * 100));
+    }
+
+    updateLoading(key, false);
+    showSuccess();
   };
+
+  const handleAddNewRows = async (key) => {
+    if (!selectedFile) return;
+    updateLoading(key, true);
+    updateProgress(key, 0);
+
+    const data = await readExcel(selectedFile);
+    const existingDocs = await getDocs(collection(db, 'students'));
+    const existing = existingDocs.docs.map((doc) => doc.data().Admissionnumber);
+    const total = data.length;
+    let count = 0;
+
+    for (const item of data) {
+      const { Admissionnumber, Name, Department, Semester } = item;
+      if (!Admissionnumber || !Name || !Department || !Semester) continue;
+
+      if (!existing.includes(Admissionnumber)) {
+        await addDoc(collection(db, 'students'), {
+          Admissionnumber,
+          Name,
+          Department,
+          Semester,
+        });
+      }
+
+      count++;
+      updateProgress(key, Math.round((count / total) * 100));
+    }
+
+    updateLoading(key, false);
+    showSuccess();
+  };
+
+  const handleReplaceMatchingRows = async (key) => {
+    if (!selectedFile) return;
+    updateLoading(key, true);
+    updateProgress(key, 0);
+
+    const data = await readExcel(selectedFile);
+    const snapshot = await getDocs(collection(db, 'students'));
+    const studentMap = {};
+    snapshot.docs.forEach((docSnap) => {
+      studentMap[docSnap.data().Admissionnumber] = docSnap.id;
+    });
+
+    const total = data.length;
+    let count = 0;
+
+    for (const item of data) {
+      const { Admissionnumber, Name, Department, Semester } = item;
+      if (!Admissionnumber || !Name || !Department || !Semester) continue;
+
+      const existingId = studentMap[Admissionnumber];
+      if (existingId) {
+        await setDoc(doc(db, 'students', existingId), {
+          Admissionnumber,
+          Name,
+          Department,
+          Semester,
+        });
+      }
+
+      count++;
+      updateProgress(key, Math.round((count / total) * 100));
+    }
+
+    updateLoading(key, false);
+    showSuccess();
+  };
+
+  const handleDeleteAll = async (key) => {
+    updateLoading(key, true);
+    updateProgress(key, 0);
+    const snapshot = await getDocs(collection(db, 'students'));
+    let count = 0;
+    const total = snapshot.docs.length;
+
+    for (const docSnap of snapshot.docs) {
+      await deleteDoc(doc(db, 'students', docSnap.id));
+      count++;
+      updateProgress(key, Math.round((count / total) * 100));
+    }
+
+    updateLoading(key, false);
+    showSuccess();
+  };
+
+  const handlePromoteStudents = async (key) => {
+    updateLoading(key, true);
+    updateProgress(key, 0);
+    const snapshot = await getDocs(collection(db, 'students'));
+    let count = 0;
+    const total = snapshot.docs.length;
+
+    for (const docSnap of snapshot.docs) {
+      const data = docSnap.data();
+      let newSemester = parseInt(data.Semester) + 1;
+
+      if (newSemester > 8) {
+        await deleteDoc(doc(db, 'students', docSnap.id));
+      } else {
+        await setDoc(doc(db, 'students', docSnap.id), {
+          ...data,
+          Semester: String(newSemester),
+        });
+      }
+
+      count++;
+      updateProgress(key, Math.round((count / total) * 100));
+    }
+
+    updateLoading(key, false);
+    showSuccess();
+  };
+  
 
   return (
     <div>
       <Navbar />
       <div className={styles.settingsContainer}>
         <div className={styles.content}>
-          <h2>Upload Student Details</h2>
+          <h2>Add New Rows</h2>
           <input
             type="file"
             accept=".xlsx, .xls, .csv"
             onChange={(e) => setSelectedFile(e.target.files[0])}
             className={styles.fileInput}
           />
-          <div className={styles.operationContainer}>
-            <label>
-              <input
-                type="radio"
-                value="add"
-                checked={operation === 'add'}
-                onChange={() => setOperation('add')}
-              />
-              Add Rows
-            </label>
-            <label>
-              <input
-                type="radio"
-                value="delete"
-                checked={operation === 'delete'}
-                onChange={() => setOperation('delete')}
-              />
-              Delete Current Rows and Update
-            </label>
-            <label>
-              <input
-                type="radio"
-                value="replace"
-                checked={operation === 'replace'}
-                onChange={() => setOperation('replace')}
-              />
-              Replace Matching Rows
-            </label>
-          </div>
-          <button onClick={handleUpload} className={styles.uploadButton}>
-            Upload
+          <button
+            onClick={() => handleAddNewRows('newrows')}
+            className={styles.uploadButton}
+            disabled={loading.newrows}
+          >
+            {loading.newrows ? `Uploading... ${progress.newrows || 0}%` : 'Upload'}
           </button>
-          <div className={styles.progressBar}>
-            <div className={styles.progressFill} style={{ width: `${uploadProgress}%` }} />
-          </div>
+        </div>
+        <div className={styles.content}>
+          <h2>Promote Students</h2>
+          <button
+            className={styles.promoteButton}
+            onClick={() => confirmAction(handlePromoteStudents, 'Are you sure you want to promote all students?', 'promote')}
+            disabled={loading.promote}
+          >
+            {loading.promote ? `Promoting... ${progress.promote || 0}%` : 'Promote All'}
+          </button>
+        </div>
+        <div className={styles.content}>
+          <h2>Add New File</h2>
+          <input
+            type="file"
+            accept=".xlsx, .xls, .csv"
+            onChange={(e) => setSelectedFile(e.target.files[0])}
+            className={styles.fileInput}
+          />
+          <button
+            onClick={() => handleAddNewFile('add')}
+            className={styles.uploadButton}
+            disabled={loading.add}
+          >
+            {loading.add ? `Uploading... ${progress.add || 0}%` : 'Upload'}
+          </button>
+        </div>
+        <div className={styles.content}>
+          <h2>Delete All Rows</h2>
+          <button
+            className={styles.deleteButton}
+            onClick={() => confirmAction(handleDeleteAll, 'Are you sure you want to delete all rows?', 'delete')}
+            disabled={loading.delete}
+          >
+            {loading.delete ? `Deleting... ${progress.delete || 0}%` : 'Delete All Rows'}
+          </button>
         </div>
       </div>
+    
+      {confirmation.visible && (
+        <div className={styles.confirmModal}>
+          <div className={styles.confirmBox}>
+            <p>{confirmation.message}</p>
+            <div className={styles.confirmButtons}>
+              <button onClick={executeConfirmedAction}>Confirm</button>
+              <button onClick={() => setConfirmation({ visible: false, action: null, message: '', actionKey: '' })}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showSuccessBox && (
-        <div className={styles.successBox}>
-          <span className={styles.arrow}></span>
-          Upload Successful
+          <div className={styles.popup}>
+          Operation Successfull!
+          <div className={styles.timeline}></div>
         </div>
       )}
     </div>
