@@ -162,6 +162,7 @@ const BusRoutes = () => {
         <div className={styles.modalBackdrop}>
           <div className={styles.modal}>
             <h3 className={styles.modalTitle}>Edit Boarding Point</h3>
+            <div className={styles.modalInputGroup}>
             <input type="text" value={editData.code} disabled className={styles.input} />
             <input
               type="text"
@@ -175,6 +176,7 @@ const BusRoutes = () => {
               onChange={(e) => setEditData({ ...editData, fare: e.target.value })}
               className={styles.input}
             />
+            </div>
             <div className={styles.modalActions}>
               <button className={styles.submitButton} onClick={handleEditSubmit}>Save</button>
               <button className={styles.cancelButton} onClick={() => setEditModal(false)}>Cancel</button>
