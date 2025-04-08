@@ -49,34 +49,6 @@ const Settings = () => {
     setProgress((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleAddNewFile = async (key) => {
-    if (!selectedFile) return;
-    updateLoading(key, true);
-    updateProgress(key, 0);
-
-    const data = await readExcel(selectedFile);
-    const total = data.length;
-    let count = 0;
-
-    for (const item of data) {
-      const { Admissionnumber, Name, Department, Semester } = item;
-      if (!Admissionnumber || !Name || !Department || !Semester) continue;
-
-      await addDoc(collection(db, 'students'), {
-        Admissionnumber,
-        Name,
-        Department,
-        Semester,
-      });
-
-      count++;
-      updateProgress(key, Math.round((count / total) * 100));
-    }
-
-    updateLoading(key, false);
-    showSuccess();
-  };
-
   const handleAddNewRows = async (key) => {
     if (!selectedFile) return;
     updateLoading(key, true);
@@ -94,43 +66,6 @@ const Settings = () => {
 
       if (!existing.includes(Admissionnumber)) {
         await addDoc(collection(db, 'students'), {
-          Admissionnumber,
-          Name,
-          Department,
-          Semester,
-        });
-      }
-
-      count++;
-      updateProgress(key, Math.round((count / total) * 100));
-    }
-
-    updateLoading(key, false);
-    showSuccess();
-  };
-
-  const handleReplaceMatchingRows = async (key) => {
-    if (!selectedFile) return;
-    updateLoading(key, true);
-    updateProgress(key, 0);
-
-    const data = await readExcel(selectedFile);
-    const snapshot = await getDocs(collection(db, 'students'));
-    const studentMap = {};
-    snapshot.docs.forEach((docSnap) => {
-      studentMap[docSnap.data().Admissionnumber] = docSnap.id;
-    });
-
-    const total = data.length;
-    let count = 0;
-
-    for (const item of data) {
-      const { Admissionnumber, Name, Department, Semester } = item;
-      if (!Admissionnumber || !Name || !Department || !Semester) continue;
-
-      const existingId = studentMap[Admissionnumber];
-      if (existingId) {
-        await setDoc(doc(db, 'students', existingId), {
           Admissionnumber,
           Name,
           Department,
@@ -190,14 +125,13 @@ const Settings = () => {
     updateLoading(key, false);
     showSuccess();
   };
-  
 
   return (
     <div>
       <Navbar />
       <div className={styles.settingsContainer}>
         <div className={styles.content}>
-          <h2>Add New Rows</h2>
+          <h2>Add Student Details</h2>
           <input
             type="file"
             accept=".xlsx, .xls, .csv"
@@ -223,22 +157,6 @@ const Settings = () => {
           </button>
         </div>
         <div className={styles.content}>
-          <h2>Add New File</h2>
-          <input
-            type="file"
-            accept=".xlsx, .xls, .csv"
-            onChange={(e) => setSelectedFile(e.target.files[0])}
-            className={styles.fileInput}
-          />
-          <button
-            onClick={() => handleAddNewFile('add')}
-            className={styles.uploadButton}
-            disabled={loading.add}
-          >
-            {loading.add ? `Uploading... ${progress.add || 0}%` : 'Upload'}
-          </button>
-        </div>
-        <div className={styles.content}>
           <h2>Delete All Rows</h2>
           <button
             className={styles.deleteButton}
@@ -249,7 +167,7 @@ const Settings = () => {
           </button>
         </div>
       </div>
-    
+
       {confirmation.visible && (
         <div className={styles.confirmModal}>
           <div className={styles.confirmBox}>
@@ -263,7 +181,7 @@ const Settings = () => {
       )}
 
       {showSuccessBox && (
-          <div className={styles.popup}>
+        <div className={styles.popup}>
           Operation Successfull!
           <div className={styles.timeline}></div>
         </div>
