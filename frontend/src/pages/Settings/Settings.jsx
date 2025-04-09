@@ -19,6 +19,9 @@ const Settings = () => {
   const [loading, setLoading] = useState({});
   const [showSuccessBox, setShowSuccessBox] = useState(false);
   const [confirmation, setConfirmation] = useState({ visible: false, action: null, message: '', actionKey: '' });
+  const [passwordModal, setPasswordModal] = useState({ visible: false, action: null, message: '', actionKey: '' });
+  const [enteredPassword, setEnteredPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
   const readExcel = async (file) => {
     const data = await file.arrayBuffer();
@@ -33,7 +36,8 @@ const Settings = () => {
   };
 
   const confirmAction = (action, message, actionKey) => {
-    setConfirmation({ visible: true, action, message, actionKey });
+    setPasswordModal({ visible: true, action, message, actionKey });
+    setPasswordError('');
   };
 
   const executeConfirmedAction = async () => {
@@ -137,6 +141,22 @@ const Settings = () => {
     showSuccess();
   };
 
+  const validatePassword = () => {
+    if (enteredPassword === import.meta.env.VITE_PASSWORD) {
+      setPasswordModal({ visible: false, action: null, message: '', actionKey: '' });
+      setEnteredPassword('');
+      setPasswordError('');
+      setConfirmation({
+        visible: true,
+        action: passwordModal.action,
+        message: passwordModal.message,
+        actionKey: passwordModal.actionKey,
+      });
+    } else {
+      setPasswordError('Incorrect password!');
+    }
+  };
+
   return (
     <div>
       <Navbar />
@@ -180,7 +200,7 @@ const Settings = () => {
             onClick={() =>
               confirmAction(
                 handlePromoteStudents,
-                'Are you sure you want to promote all students?This action cannot be undone. ',
+                'Are you sure you want to promote all students? This action cannot be undone.',
                 'promote'
               )
             }
@@ -196,7 +216,7 @@ const Settings = () => {
             onClick={() =>
               confirmAction(
                 handleDeleteAll,
-                'Are you sure you want to delete all rows?This action cannot be undone.',
+                'Are you sure you want to delete all rows? This action cannot be undone.',
                 'delete'
               )
             }
@@ -221,8 +241,34 @@ const Settings = () => {
 
       {showSuccessBox && (
         <div className={styles.popup}>
-          Operation Successfull!
+          Operation Successful!
           <div className={styles.timeline}></div>
+        </div>
+      )}
+
+      {passwordModal.visible && (
+        <div className={styles.confirmModal}>
+          <div className={styles.confirmBox}>
+            <p>Enter password to continue</p>
+            <input
+              type="password"
+              value={enteredPassword}
+              onChange={(e) => setEnteredPassword(e.target.value)}
+              placeholder="Password"
+              className={styles.passwordInput}
+            />
+            {passwordError && (
+              <p className={styles.errorText}>{passwordError}</p>
+            )}
+            <div className={styles.confirmButtons}>
+              <button onClick={validatePassword}>Submit</button>
+              <button onClick={() => {
+                setPasswordModal({ visible: false, action: null, message: '', actionKey: '' });
+                setEnteredPassword('');
+                setPasswordError('');
+              }}>Cancel</button>
+            </div>
+          </div>
         </div>
       )}
     </div>
