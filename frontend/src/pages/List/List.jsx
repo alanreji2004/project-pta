@@ -188,7 +188,7 @@ const List = () => {
                     <div>{student.Admissionnumber}</div>
                     <div>{student.Name}</div>
                     <div>{student.busPoint}</div>
-                    <div>{student.Semester || '-'}</div>
+                    <div>S{student.Semester || '-'}</div>
                     <div>₹{student.remainingFees || 0}</div>
                   </div>
                 ))
