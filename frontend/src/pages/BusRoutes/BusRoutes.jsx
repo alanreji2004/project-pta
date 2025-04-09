@@ -13,7 +13,7 @@ import {
   onSnapshot,
   getDocs,
 } from 'firebase/firestore';
-import { FaPlus, FaMinus, FaTrash } from 'react-icons/fa';
+import { FaPlus, FaMinus, FaTrash, FaPen } from 'react-icons/fa';
 
 const BusRoutes = () => {
   const [routeName, setRouteName] = useState('');
@@ -23,9 +23,13 @@ const BusRoutes = () => {
   const [selectedRouteId, setSelectedRouteId] = useState('');
   const [boardingCode, setBoardingCode] = useState('');
   const [boardingName, setBoardingName] = useState('');
+  const [boardingTime, setBoardingTime] = useState('');
   const [searchError, setSearchError] = useState('');
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [routeToDelete, setRouteToDelete] = useState(null);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editCode, setEditCode] = useState('');
+  const [editTime, setEditTime] = useState('');
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'busroutes'), (snapshot) => {
@@ -55,6 +59,7 @@ const BusRoutes = () => {
     setSelectedRouteId(routeId);
     setBoardingCode('');
     setBoardingName('');
+    setBoardingTime('');
     setSearchError('');
     setModalVisible(true);
   };
@@ -91,7 +96,11 @@ const BusRoutes = () => {
     const route = routes.find((r) => r.id === selectedRouteId);
     const updatedPoints = [
       ...route.boardingPoints,
-      { code: boardingCode.toUpperCase(), name: boardingName.toUpperCase() },
+      {
+        code: boardingCode.toUpperCase(),
+        name: boardingName.toUpperCase(),
+        time: boardingTime || '',
+      },
     ];
     await updateDoc(routeRef, { boardingPoints: updatedPoints });
     setModalVisible(false);
@@ -102,6 +111,23 @@ const BusRoutes = () => {
     const route = routes.find((r) => r.id === routeId);
     const updatedPoints = route.boardingPoints.filter((point) => point.code !== codeToRemove);
     await updateDoc(routeRef, { boardingPoints: updatedPoints });
+  };
+
+  const openEditModal = (routeId, code, currentTime) => {
+    setSelectedRouteId(routeId);
+    setEditCode(code);
+    setEditTime(currentTime || '');
+    setEditModalVisible(true);
+  };
+
+  const saveEditedTime = async () => {
+    const routeRef = doc(db, 'busroutes', selectedRouteId);
+    const route = routes.find((r) => r.id === selectedRouteId);
+    const updatedPoints = route.boardingPoints.map((point) =>
+      point.code === editCode ? { ...point, time: editTime } : point
+    );
+    await updateDoc(routeRef, { boardingPoints: updatedPoints });
+    setEditModalVisible(false);
   };
 
   const openConfirmDelete = (routeId) => {
@@ -157,6 +183,7 @@ const BusRoutes = () => {
             <div className={styles.tableHeader}>
               <div>Code</div>
               <div>Name</div>
+              <div>Time</div>
               <div>Actions</div>
             </div>
             {route.boardingPoints &&
@@ -164,12 +191,21 @@ const BusRoutes = () => {
                 <div key={index} className={styles.tableRow}>
                   <div>{point.code}</div>
                   <div>{point.name}</div>
-                  <button
-                    className={styles.removeButton}
-                    onClick={() => handleRemovePoint(route.id, point.code)}
-                  >
-                    <FaMinus size={12} />
-                  </button>
+                  <div>{point.time || '--'}</div>
+                  <div className={styles.actionsCell}>
+                    <button
+                      className={styles.editButton}
+                      onClick={() => openEditModal(route.id, point.code, point.time)}
+                    >
+                      <FaPen size={12} />
+                    </button>
+                    <button
+                      className={styles.removeButton}
+                      onClick={() => handleRemovePoint(route.id, point.code)}
+                    >
+                      <FaMinus size={12} />
+                    </button>
+                  </div>
                 </div>
               ))}
           </div>
@@ -197,6 +233,13 @@ const BusRoutes = () => {
               value={boardingName}
               readOnly
             />
+            <input
+              type='time'
+              className={styles.modalInput}
+              placeholder="Enter Time"
+              value={boardingTime}
+              onChange={(e) => setBoardingTime(e.target.value)}
+            />
             <div className={styles.modalButtons}>
               <button
                 className={styles.modalSaveButton}
@@ -206,6 +249,29 @@ const BusRoutes = () => {
                 Save
               </button>
               <button className={styles.modalCancelButton} onClick={() => setModalVisible(false)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editModalVisible && (
+        <div className={styles.modalBackdrop}>
+          <div className={styles.modal}>
+            <h3 className={styles.modalTitle}>Edit Time</h3>
+            <input
+              type='time'
+              className={styles.modalInput}
+              placeholder="Enter New Time"
+              value={editTime}
+              onChange={(e) => setEditTime(e.target.value)}
+            />
+            <div className={styles.modalButtons}>
+              <button className={styles.modalSaveButton} onClick={saveEditedTime}>
+                Save
+              </button>
+              <button className={styles.modalCancelButton} onClick={() => setEditModalVisible(false)}>
                 Cancel
               </button>
             </div>

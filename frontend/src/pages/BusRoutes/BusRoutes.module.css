@@ -90,7 +90,7 @@
   .tableHeader,
   .tableRow {
     display: grid;
-    grid-template-columns: 1fr 1fr 0.5fr;
+    grid-template-columns: 1fr 1fr 1fr 0.5fr;
     padding: 0.7rem 0.5rem;
     font-size: 14px;
     border-bottom: 1px solid #f0f0f0;
@@ -129,7 +129,7 @@
   
     .tableHeader,
     .tableRow {
-      grid-template-columns: 1fr 2fr 0.5fr;
+      grid-template-columns: 1fr 2fr 1fr 0.5fr;
       font-size: 13px;
       padding: 0.6rem;
     }
@@ -338,5 +338,21 @@
     color: #ff4d4f;
     font-size: 0.9rem;
     margin-top: 4px;
+  }
+  .actionsCell {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  
+  .editButton {
+    background-color: transparent;
+    border: none;
+    color: #000000;
+    cursor: pointer;
+  }
+  
+  .editButton:hover {
+    color: #020202;
   }
   
