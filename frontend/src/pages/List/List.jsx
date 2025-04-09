@@ -44,13 +44,26 @@ const List = () => {
       if (routeStudents.length === 0) return;
 
       const headers = withFees
-        ? ['Sl No', 'Admission No', 'Name', 'Boarding Point', 'Remaining Fee']
-        : ['Sl No', 'Admission No', 'Name', 'Boarding Point'];
+        ? ['Sl No', 'Admission No', 'Name', 'Boarding Point', 'Semester', 'Remaining Fee']
+        : ['Sl No', 'Admission No', 'Name', 'Boarding Point', 'Semester'];
 
       const rows = routeStudents.map((student, i) =>
         withFees
-          ? [i + 1, student.Admissionnumber, student.Name, student.busPoint, `₹${student.remainingFees || 0}`]
-          : [i + 1, student.Admissionnumber, student.Name, student.busPoint]
+          ? [
+              i + 1,
+              student.Admissionnumber,
+              student.Name,
+              student.busPoint,
+              `S${student.Semester || '-'}`,
+              student.remainingFees || 0
+            ]
+          : [
+              i + 1,
+              student.Admissionnumber,
+              student.Name,
+              student.busPoint,
+              `S${student.Semester || '-'}`
+            ]
       );
 
       content += `\n${route.routeName}\n`;
@@ -67,7 +80,7 @@ const List = () => {
     const blob = new Blob([content], { type: 'text/csv' });
     const link = document.createElement('a');
     link.href = window.URL.createObjectURL(blob);
-    link.download = withFees ? 'students_with_fees.csv' : 'students_without_fees.csv';
+    link.download = withFees ? 'students_with_fees.csv' : 'StudentsList.csv';
     link.click();
   };
 
@@ -89,13 +102,26 @@ const List = () => {
       currentY += 6;
 
       const headers = withFees
-        ? ['Sl No', 'Admission No', 'Name', 'Boarding Point', 'Remaining Fee']
-        : ['Sl No', 'Admission No', 'Name', 'Boarding Point'];
+        ? ['Sl No', 'Admission No', 'Name', 'Boarding Point', 'Semester', 'Remaining Fee']
+        : ['Sl No', 'Admission No', 'Name', 'Boarding Point', 'Semester'];
 
       const rows = routeStudents.map((student, i) =>
         withFees
-          ? [i + 1, student.Admissionnumber, student.Name, student.busPoint,student.remainingFees||0]
-          : [i + 1, student.Admissionnumber, student.Name, student.busPoint]
+          ? [
+              i + 1,
+              student.Admissionnumber,
+              student.Name,
+              student.busPoint,
+              `S${student.Semester || '-'}`,
+              student.remainingFees || 0
+            ]
+          : [
+              i + 1,
+              student.Admissionnumber,
+              student.Name,
+              student.busPoint,
+              `S${student.Semester || '-'}`
+            ]
       );
 
       autoTable(doc, {
@@ -115,7 +141,7 @@ const List = () => {
       currentY += 10;
     });
 
-    doc.save(withFees ? 'students_with_fees.pdf' : 'students_without_fees.pdf');
+    doc.save(withFees ? 'students_with_fees.pdf' : 'StudentsList.pdf');
   };
 
   return (
@@ -153,6 +179,7 @@ const List = () => {
                 <div>Admission No</div>
                 <div>Name</div>
                 <div>Boarding Point</div>
+                <div>Semester</div>
                 <div>Remaining Fee</div>
               </div>
               {filteredStudents.length > 0 ? (
@@ -161,6 +188,7 @@ const List = () => {
                     <div>{student.Admissionnumber}</div>
                     <div>{student.Name}</div>
                     <div>{student.busPoint}</div>
+                    <div>{student.Semester || '-'}</div>
                     <div>₹{student.remainingFees || 0}</div>
                   </div>
                 ))
