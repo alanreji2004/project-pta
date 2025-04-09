@@ -129,7 +129,7 @@
   
     .tableHeader,
     .tableRow {
-      grid-template-columns: 1fr 2fr 1fr 0.5fr;
+      grid-template-columns: 1fr 2.5fr 1fr 0.5fr;
       font-size: 13px;
       padding: 0.6rem;
     }
