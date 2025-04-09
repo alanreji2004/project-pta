@@ -24,11 +24,12 @@ const Home = () => {
   const [codeToFullMap, setCodeToFullMap] = useState({});
   const [popupMessage, setPopupMessage] = useState('');
   const [showPopup, setShowPopup] = useState(false);
+  const [currentDocId, setCurrentDocId] = useState('');
 
   useEffect(() => {
     const fetchAll = async () => {
       const studentSnapshot = await getDocs(collection(db, 'students'));
-      const studentsData = studentSnapshot.docs.map(doc => doc.data());
+      const studentsData = studentSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setAllStudents(studentsData);
 
       const boardingSnapshot = await getDocs(collection(db, 'boardingpoints'));
@@ -114,6 +115,8 @@ const Home = () => {
       } else {
         setSelectedPayment('');
       }
+
+      setCurrentDocId(student.id);
     }
   };
 
@@ -152,8 +155,8 @@ const Home = () => {
     };
 
     try {
-      const sanitizedAdmission = admissionNumber.replaceAll('/', '-');
-      await setDoc(doc(db, 'students', sanitizedAdmission), payload);
+      const docId = currentDocId || encodeURIComponent(admissionNumber);
+      await setDoc(doc(db, 'students', docId), payload);
       setPopupMessage('Saved successfully');
       setShowPopup(true);
       setAdmissionNumber('');
@@ -167,6 +170,7 @@ const Home = () => {
         remainingFees: '',
         totalPayable: ''
       });
+      setCurrentDocId('');
     } catch (error) {
       setPopupMessage('Error occurred');
       setShowPopup(true);
@@ -233,12 +237,7 @@ const Home = () => {
               )}
             </div>
             <button className={styles.button} onClick={handleCalculateFee}>Calculate Fee</button>
-            <input
-              type="text"
-              value={studentData.fees}
-              className={styles.inputBox}
-              readOnly
-            />
+            <input type="text" value={studentData.fees} className={styles.inputBox} readOnly />
           </div>
 
           <div className={styles.row}>
