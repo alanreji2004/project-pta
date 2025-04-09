@@ -13,7 +13,6 @@ import Navbar from '../../components/Navbar/Navbar';
 import styles from './Settings.module.css';
 import { Link } from "react-router-dom";
 
-
 const Settings = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [progress, setProgress] = useState({});
@@ -114,8 +113,18 @@ const Settings = () => {
       if (newSemester > 8) {
         await deleteDoc(doc(db, 'students', docSnap.id));
       } else {
+        const {
+          fees,
+          busPoint,
+          fullypaid,
+          paid,
+          partiallypaid,
+          remainingFees,
+          ...cleanedData
+        } = data;
+
         await setDoc(doc(db, 'students', docSnap.id), {
-          ...data,
+          ...cleanedData,
           Semester: String(newSemester),
         });
       }
@@ -135,17 +144,17 @@ const Settings = () => {
         <div className={styles.content}>
           <h2>Add/Edit Boarding points</h2>
           <Link to="/boardingpoints">
-          <button className={styles.busButton}>
-            Go To Page
-          </button>
+            <button className={styles.busButton}>
+              Go To Page
+            </button>
           </Link>
         </div>
         <div className={styles.content}>
           <h2>Add/Edit Bus Routes</h2>
           <Link to="/routes">
-          <button className={styles.busButton}>
-            Go To Page
-          </button>
+            <button className={styles.busButton}>
+              Go To Page
+            </button>
           </Link>
         </div>
         <div className={styles.content}>
@@ -168,7 +177,13 @@ const Settings = () => {
           <h2>Promote to next Semester</h2>
           <button
             className={styles.promoteButton}
-            onClick={() => confirmAction(handlePromoteStudents, 'Are you sure you want to promote all students?This action cannot be undone. ', 'promote')}
+            onClick={() =>
+              confirmAction(
+                handlePromoteStudents,
+                'Are you sure you want to promote all students?This action cannot be undone. ',
+                'promote'
+              )
+            }
             disabled={loading.promote}
           >
             {loading.promote ? `Promoting... ${progress.promote || 0}%` : 'Promote All'}
@@ -178,7 +193,13 @@ const Settings = () => {
           <h2>Delete All Rows</h2>
           <button
             className={styles.deleteButton}
-            onClick={() => confirmAction(handleDeleteAll, 'Are you sure you want to delete all rows?This action cannot be undone.', 'delete')}
+            onClick={() =>
+              confirmAction(
+                handleDeleteAll,
+                'Are you sure you want to delete all rows?This action cannot be undone.',
+                'delete'
+              )
+            }
             disabled={loading.delete}
           >
             {loading.delete ? `Deleting... ${progress.delete || 0}%` : 'Delete All Rows'}
