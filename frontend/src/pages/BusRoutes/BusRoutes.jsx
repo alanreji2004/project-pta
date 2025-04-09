@@ -13,7 +13,9 @@ import {
   onSnapshot,
   getDocs,
 } from 'firebase/firestore';
-import { FaPlus, FaMinus, FaTrash, FaPen } from 'react-icons/fa';
+import { FaPlus, FaMinus, FaTrash, FaPen, FaDownload } from 'react-icons/fa';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const BusRoutes = () => {
   const [routeName, setRouteName] = useState('');
@@ -142,6 +144,46 @@ const BusRoutes = () => {
     setRouteToDelete(null);
   };
 
+  const downloadCSV = () => {
+    const rows = [];
+    routes.forEach((route) => {
+      rows.push([route.routeName]);
+      rows.push(['Code', 'Name', 'Time']);
+      route.boardingPoints.forEach((point) => {
+        rows.push([point.code, point.name, point.time || '--']);
+      });
+      rows.push([]);
+    });
+    const csvContent = rows.map((row) => row.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'BusRoutes.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const downloadPDF = () => {
+    const docPDF = new jsPDF();
+    routes.forEach((route, idx) => {
+      if (idx !== 0) docPDF.addPage();
+      docPDF.setFontSize(14);
+      docPDF.text(route.routeName, 14, 20);
+      const tableData = route.boardingPoints.map((point) => [
+        point.code,
+        point.name,
+        point.time || '--',
+      ]);
+      autoTable(docPDF, {
+        head: [['Code', 'Name', 'Time']],
+        body: tableData,
+        startY: 30,
+      });
+    });
+    docPDF.save('BusRoutes.pdf');
+  };
+
   return (
     <div className={styles.pageContainer}>
       <Navbar />
@@ -161,6 +203,12 @@ const BusRoutes = () => {
           />
           <button className={styles.submitButton} onClick={handleAddRoute}>
             Add Route
+          </button>
+          <button className={styles.downloadButton} onClick={downloadCSV}>
+            <FaDownload /> CSV
+          </button>
+          <button className={styles.downloadButton} onClick={downloadPDF}>
+            <FaDownload /> PDF
           </button>
         </div>
         {routeError && <p className={styles.errorText}>{routeError}</p>}
@@ -227,14 +275,9 @@ const BusRoutes = () => {
               Search
             </button>
             {searchError && <p className={styles.errorText}>{searchError}</p>}
+            <input className={styles.modalInput} placeholder="Boarding Name" value={boardingName} readOnly />
             <input
-              className={styles.modalInput}
-              placeholder="Boarding Name"
-              value={boardingName}
-              readOnly
-            />
-            <input
-              type='time'
+              type="time"
               className={styles.modalInput}
               placeholder="Enter Time"
               value={boardingTime}
@@ -261,7 +304,7 @@ const BusRoutes = () => {
           <div className={styles.modal}>
             <h3 className={styles.modalTitle}>Edit Time</h3>
             <input
-              type='time'
+              type="time"
               className={styles.modalInput}
               placeholder="Enter New Time"
               value={editTime}
