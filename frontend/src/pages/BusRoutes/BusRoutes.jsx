@@ -18,6 +18,7 @@ import { FaPlus, FaMinus, FaTrash } from 'react-icons/fa';
 const BusRoutes = () => {
   const [routeName, setRouteName] = useState('');
   const [routes, setRoutes] = useState([]);
+  const [routeError, setRouteError] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedRouteId, setSelectedRouteId] = useState('');
   const [boardingCode, setBoardingCode] = useState('');
@@ -31,18 +32,23 @@ const BusRoutes = () => {
       const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       setRoutes(data);
     });
-
     return () => unsubscribe();
   }, []);
 
   const handleAddRoute = async () => {
-    if (!routeName.trim()) return;
     const name = routeName.trim().toUpperCase();
+    if (!name) return;
+    const isDuplicate = routes.some((route) => route.routeName === name);
+    if (isDuplicate) {
+      setRouteError('Route name already in use.');
+      return;
+    }
     await addDoc(collection(db, 'busroutes'), {
       routeName: name,
       boardingPoints: [],
     });
     setRouteName('');
+    setRouteError('');
   };
 
   const openModal = (routeId) => {
@@ -56,12 +62,20 @@ const BusRoutes = () => {
   const searchBoardingPoint = async () => {
     const code = boardingCode.trim().toUpperCase();
     if (!code) return;
-
     const q = query(collection(db, 'boardingpoints'), where('code', '==', code));
     const snapshot = await getDocs(q);
-
     if (!snapshot.empty) {
       const data = snapshot.docs[0].data();
+      const isUsedInAnotherRoute = routes.some(
+        (route) =>
+          route.id !== selectedRouteId &&
+          route.boardingPoints.some((point) => point.code === data.code.toUpperCase())
+      );
+      if (isUsedInAnotherRoute) {
+        setBoardingName('');
+        setSearchError(`Boarding point already used in another route`);
+        return;
+      }
       setBoardingCode(data.code.toUpperCase());
       setBoardingName(data.name.toUpperCase());
       setSearchError('');
@@ -113,13 +127,17 @@ const BusRoutes = () => {
             placeholder="Enter Route Name"
             className={styles.input}
             value={routeName}
-            onChange={(e) => setRouteName(e.target.value.toUpperCase())}
+            onChange={(e) => {
+              setRouteName(e.target.value.toUpperCase());
+              setRouteError('');
+            }}
             onKeyDown={(e) => e.key === 'Enter' && handleAddRoute()}
           />
           <button className={styles.submitButton} onClick={handleAddRoute}>
             Add Route
           </button>
         </div>
+        {routeError && <p className={styles.errorText}>{routeError}</p>}
       </div>
 
       <div className={styles.routesSection}>

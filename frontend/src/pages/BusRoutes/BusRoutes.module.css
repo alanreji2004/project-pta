@@ -334,4 +334,9 @@
   .modalDeleteButton:hover {
     background-color: #dc2626;
   }
+  .errorText {
+    color: #ff4d4f;
+    font-size: 0.9rem;
+    margin-top: 4px;
+  }
   
