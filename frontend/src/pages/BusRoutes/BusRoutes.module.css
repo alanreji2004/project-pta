@@ -11,7 +11,11 @@
     margin-left: auto;
     margin-right: auto;
   }
-  
+  @media (max-width: 768px){
+    .addRouteSection{
+        margin-left: -30px;
+    }
+  }
   .sectionTitle {
     font-size: 24px;
     font-weight: 600;
@@ -125,7 +129,7 @@
   
     .tableHeader,
     .tableRow {
-      grid-template-columns: 2fr 0.5fr;
+      grid-template-columns: 1fr 2fr 0.5fr;
       font-size: 13px;
       padding: 0.6rem;
     }
@@ -151,7 +155,7 @@
     background-color: #f9f9f9;
     border-radius: 8px;
     padding: 2rem;
-    width: 90%;
+    width: 75%;
     max-width: 400px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
   }
@@ -173,6 +177,7 @@
     font-size: 0.95rem;
     color: #333;
     background-color: white;
+    margin-left: -10px;
   }
   
   .searchButton {
@@ -185,6 +190,7 @@
     cursor: pointer;
     margin-bottom: 1rem;
     transition: background-color 0.2s ease;
+    margin-left: -10px;
   }
   
   .searchButton:hover {
@@ -207,6 +213,7 @@
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.2s ease;
+    margin-left: -10px;
   }
   
   .modalSaveButton:disabled {

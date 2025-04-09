@@ -5,12 +5,13 @@ import { db } from '../../firebase';
 import {
   collection,
   addDoc,
-  getDocs,
   updateDoc,
   doc,
   deleteDoc,
   query,
   where,
+  onSnapshot,
+  getDocs,
 } from 'firebase/firestore';
 import { FaPlus, FaMinus, FaTrash } from 'react-icons/fa';
 
@@ -25,14 +26,13 @@ const BusRoutes = () => {
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [routeToDelete, setRouteToDelete] = useState(null);
 
-  const fetchRoutes = async () => {
-    const snapshot = await getDocs(collection(db, 'busroutes'));
-    const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    setRoutes(data);
-  };
-
   useEffect(() => {
-    fetchRoutes();
+    const unsubscribe = onSnapshot(collection(db, 'busroutes'), (snapshot) => {
+      const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setRoutes(data);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const handleAddRoute = async () => {
@@ -43,7 +43,6 @@ const BusRoutes = () => {
       boardingPoints: [],
     });
     setRouteName('');
-    fetchRoutes();
   };
 
   const openModal = (routeId) => {
@@ -57,6 +56,7 @@ const BusRoutes = () => {
   const searchBoardingPoint = async () => {
     const code = boardingCode.trim().toUpperCase();
     if (!code) return;
+
     const q = query(collection(db, 'boardingpoints'), where('code', '==', code));
     const snapshot = await getDocs(q);
 
@@ -81,7 +81,6 @@ const BusRoutes = () => {
     ];
     await updateDoc(routeRef, { boardingPoints: updatedPoints });
     setModalVisible(false);
-    fetchRoutes();
   };
 
   const handleRemovePoint = async (routeId, codeToRemove) => {
@@ -89,7 +88,6 @@ const BusRoutes = () => {
     const route = routes.find((r) => r.id === routeId);
     const updatedPoints = route.boardingPoints.filter((point) => point.code !== codeToRemove);
     await updateDoc(routeRef, { boardingPoints: updatedPoints });
-    fetchRoutes();
   };
 
   const openConfirmDelete = (routeId) => {
@@ -102,7 +100,6 @@ const BusRoutes = () => {
     await deleteDoc(doc(db, 'busroutes', routeToDelete));
     setConfirmModalVisible(false);
     setRouteToDelete(null);
-    fetchRoutes();
   };
 
   return (
