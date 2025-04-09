@@ -74,4 +74,10 @@
       padding: 1rem 0.5rem;
     }
   }
+  .routeCount {
+    font-size: 0.85rem;
+    color: #383838;
+    margin-top: 0.3rem;
+    font-weight: 400;
+  }
   

@@ -38,7 +38,12 @@ const List = () => {
           return (
             <div key={route.id} className={styles.routeTable}>
               <div className={styles.routeHeader}>
-                <h3 className={styles.routeTitle}>{route.routeName}</h3>
+                <h3 className={styles.routeTitle}>
+                  {route.routeName}
+                  <div className={styles.routeCount}>
+                    {filteredStudents.length} students
+                  </div>
+                </h3>
               </div>
               <div className={styles.tableHeader}>
                 <div>Admission No</div>
