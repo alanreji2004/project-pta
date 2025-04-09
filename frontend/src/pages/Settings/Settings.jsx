@@ -133,8 +133,16 @@ const Settings = () => {
       <Navbar />
       <div className={styles.settingsContainer}>
         <div className={styles.content}>
-          <h2>Add/Edit Routes and Boarding points</h2>
+          <h2>Add/Edit Boarding points</h2>
           <Link to="/boardingpoints">
+          <button className={styles.busButton}>
+            Go To Page
+          </button>
+          </Link>
+        </div>
+        <div className={styles.content}>
+          <h2>Add/Edit Bus Routes</h2>
+          <Link to="/routes">
           <button className={styles.busButton}>
             Go To Page
           </button>

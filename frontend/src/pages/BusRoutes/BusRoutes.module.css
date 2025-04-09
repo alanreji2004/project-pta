@@ -1,0 +1,330 @@
+.pageContainer {
+    min-height: 100vh;
+    font-family: 'Cabin', sans-serif;
+    background-color: #ffffff;
+  }
+  
+  .addRouteSection {
+    margin-top: 3rem;
+    padding: 2rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .sectionTitle {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .inputGroup {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .input {
+    padding: 0.6rem 1rem;
+    font-size: 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    width: 250px;
+  }
+  
+  .submitButton {
+    padding: 0.6rem 1.2rem;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    cursor: pointer;
+    width: 150px;
+  }
+  
+  .routesSection {
+    margin-top: 3rem;
+    padding: 0 1rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 100px;
+  }
+  
+  .routeTable {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .routeHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .routeTitle {
+    font-size: 20px;
+    color: #111827;
+    font-weight: 500;
+  }
+  
+  .addPointButton {
+    background-color: transparent;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 0.3rem 0.6rem;
+    cursor: pointer;
+  }
+  
+  .tableHeader,
+  .tableRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr 0.5fr;
+    padding: 0.7rem 0.5rem;
+    font-size: 14px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .tableHeader {
+    background-color: #f9fafb;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .tableRow {
+    background-color: #fff;
+    color: #444;
+  }
+  
+  .removeButton {
+    background-color: transparent;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 0.2rem 0.5rem;
+    cursor: pointer;
+  }
+  
+  @media (max-width: 768px) {
+    .inputGroup {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .input,
+    .submitButton {
+      width: 100%;
+      font-size: 14px;
+    }
+  
+    .tableHeader,
+    .tableRow {
+      grid-template-columns: 2fr 0.5fr;
+      font-size: 13px;
+      padding: 0.6rem;
+    }
+  
+    .routeTitle {
+      font-size: 18px;
+    }
+  }
+  .modalBackdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100dvh;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 2rem;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .modalTitle {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: 1.2rem;
+    text-align: center;
+    color: #222;
+  }
+  
+  .modalInput {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    color: #333;
+    background-color: white;
+  }
+  
+  .searchButton {
+    background-color: #3b82f6;
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    transition: background-color 0.2s ease;
+  }
+  
+  .searchButton:hover {
+    background-color: #2563eb;
+  }
+  
+  .modalButtons {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  
+  .modalSaveButton {
+    background-color: #10b981;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .modalSaveButton:disabled {
+    background-color: #a7f3d0;
+    cursor: not-allowed;
+  }
+  
+  .modalSaveButton:hover:enabled {
+    background-color: #059669;
+  }
+  
+  .modalCancelButton {
+    background-color: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .modalCancelButton:hover {
+    background-color: #e5e7eb;
+  }
+  
+  .errorText {
+    color: red;
+    font-size: 14px;
+    margin-top: 0.5rem;
+    text-align: center;
+  }
+  .modalInput[readonly] {
+    cursor: not-allowed;
+  }
+  .deleteModal {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 2rem;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  .deleteModalTitle {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #222;
+    margin-bottom: 1rem;
+  }
+  
+  .deleteModalText {
+    color: #555;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .confirmDeleteButton {
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    padding: 0.5rem 1.2rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .confirmDeleteButton:hover {
+    background-color: #dc2626;
+  }
+  
+  .cancelDeleteButton {
+    background-color: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+    padding: 0.5rem 1.2rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .cancelDeleteButton:hover {
+    background-color: #e5e7eb;
+  }
+  
+  .deleteRouteButton {
+    background-color: transparent;
+    border: none;
+    color: #000000;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-left: 0.5rem;
+    transition: color 0.2s ease;
+  }
+  
+ 
+  .confirmText {
+    font-size: 0.95rem;
+    color: #555;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  
+  .modalDeleteButton {
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    padding: 0.5rem 1.2rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .modalDeleteButton:hover {
+    background-color: #dc2626;
+  }
+  

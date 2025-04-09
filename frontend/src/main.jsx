@@ -11,6 +11,7 @@ import Login from "./pages/Login/Login";
 import Settings from "./pages/Settings/Settings";
 import List from "./pages/List/List";
 import BoardingPoints from "./pages/BoardingPoints/BoardingPoints";
+import BusRoutes from "./pages/BusRoutes/BusRoutes";
 
 const router = createBrowserRouter([
   {
@@ -32,6 +33,10 @@ const router = createBrowserRouter([
   {
     path: "/boardingpoints",
     element: <BoardingPoints />,
+  },
+  {
+    path: "/routes",
+    element: <BusRoutes />,
   },
 ]);
 
