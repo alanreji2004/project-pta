@@ -80,4 +80,55 @@
     margin-top: 0.3rem;
     font-weight: 400;
   }
+  .searchContainer {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin: 1rem 0;
+  }
+  
+  .searchInput {
+    width: 90%;
+    max-width: 400px;
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    color: black;
+    outline: none;
+    border: 1px solid #333;
+  }
+  @media screen and (max-width: 600px) {
+    .searchInput {
+      width: 70%;
+      font-size: 0.9rem;
+      padding: 0.6rem 0.9rem;
+    }
+  }
+
+  
+  .downloadButtons {
+    display: flex;
+    justify-content: center ;
+    flex-wrap: wrap;
+    gap: 1rem;
+    width: 100%;
+    margin: 1.5rem 2rem 0 auto;
+  }
+  
+  .downloadButton {
+    padding: 0.5rem 1.2rem;
+    background-color: transparent;
+    color: #3b82f6;
+    border: 1px solid #3b82f6;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+  
+  .downloadButton:hover {
+    background-color: #3b82f6;
+    color: black;
+  }
   

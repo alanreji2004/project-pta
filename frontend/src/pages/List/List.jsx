@@ -3,10 +3,13 @@ import Navbar from '../../components/Navbar/Navbar';
 import styles from './List.module.css';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../../firebase';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const List = () => {
   const [routes, setRoutes] = useState([]);
   const [students, setStudents] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const unsubscribeRoutes = onSnapshot(collection(db, 'busroutes'), (snapshot) => {
@@ -25,16 +28,117 @@ const List = () => {
     };
   }, []);
 
+  const filteredRoutes = routes.filter((route) =>
+    route.routeName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const getRouteStudents = (route) => {
+    const bpCodes = route.boardingPoints.map((bp) => bp.code);
+    return students.filter((student) => bpCodes.includes(student.busPoint));
+  };
+
+  const generateCSVContent = (withFees) => {
+    let content = '';
+    filteredRoutes.forEach((route) => {
+      const routeStudents = getRouteStudents(route);
+      if (routeStudents.length === 0) return;
+
+      const headers = withFees
+        ? ['Sl No', 'Admission No', 'Name', 'Boarding Point', 'Remaining Fee']
+        : ['Sl No', 'Admission No', 'Name', 'Boarding Point'];
+
+      const rows = routeStudents.map((student, i) =>
+        withFees
+          ? [i + 1, student.Admissionnumber, student.Name, student.busPoint, `₹${student.remainingFees || 0}`]
+          : [i + 1, student.Admissionnumber, student.Name, student.busPoint]
+      );
+
+      content += `\n${route.routeName}\n`;
+      content += headers.join(',') + '\n';
+      content += rows.map((r) => r.join(',')).join('\n');
+      content += `\nTotal: ${routeStudents.length} students\n\n`;
+    });
+
+    return content;
+  };
+
+  const downloadCSV = (withFees) => {
+    const content = generateCSVContent(withFees);
+    const blob = new Blob([content], { type: 'text/csv' });
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = withFees ? 'students_with_fees.csv' : 'students_without_fees.csv';
+    link.click();
+  };
+
+  const downloadPDF = (withFees) => {
+    const doc = new jsPDF();
+    let currentY = 20;
+
+    filteredRoutes.forEach((route, idx) => {
+      const routeStudents = getRouteStudents(route);
+      if (routeStudents.length === 0) return;
+
+      if (idx !== 0) {
+        doc.addPage();
+        currentY = 20;
+      }
+
+      doc.setFontSize(13);
+      doc.text(`${idx + 1}. ${route.routeName}`, 14, currentY);
+      currentY += 6;
+
+      const headers = withFees
+        ? ['Sl No', 'Admission No', 'Name', 'Boarding Point', 'Remaining Fee']
+        : ['Sl No', 'Admission No', 'Name', 'Boarding Point'];
+
+      const rows = routeStudents.map((student, i) =>
+        withFees
+          ? [i + 1, student.Admissionnumber, student.Name, student.busPoint,student.remainingFees||0]
+          : [i + 1, student.Admissionnumber, student.Name, student.busPoint]
+      );
+
+      autoTable(doc, {
+        head: [headers],
+        body: rows,
+        startY: currentY,
+        styles: { fontSize: 10 },
+        theme: 'grid',
+        margin: { left: 14, right: 14 },
+        didDrawPage: (data) => {
+          currentY = data.cursor.y + 10;
+        },
+      });
+
+      doc.setFontSize(11);
+      doc.text(`Total: ${routeStudents.length} students`, 14, currentY);
+      currentY += 10;
+    });
+
+    doc.save(withFees ? 'students_with_fees.pdf' : 'students_without_fees.pdf');
+  };
+
   return (
     <div className={styles.pageContainer}>
       <Navbar />
+      <div className={styles.searchContainer}>
+        <input
+          type="text"
+          placeholder="Search route..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className={styles.searchInput}
+        />
+      </div>
+      <div className={styles.downloadButtons}>
+        <button className={styles.downloadButton} onClick={() => downloadCSV(true)}>Download CSV (With Fees)</button>
+        <button className={styles.downloadButton} onClick={() => downloadPDF(true)}>Download PDF (With Fees)</button>
+        <button className={styles.downloadButton} onClick={() => downloadCSV(false)}>Download CSV (Without Fees)</button>
+        <button className={styles.downloadButton} onClick={() => downloadPDF(false)}>Download PDF (Without Fees)</button>
+      </div>
       <div className={styles.routesSection}>
-        {routes.map((route) => {
-          const bpCodes = route.boardingPoints.map((bp) => bp.code);
-          const filteredStudents = students.filter((student) =>
-            bpCodes.includes(student.busPoint)
-          );
-
+        {filteredRoutes.map((route) => {
+          const filteredStudents = getRouteStudents(route);
           return (
             <div key={route.id} className={styles.routeTable}>
               <div className={styles.routeHeader}>
