@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../../components/Navbar/Navbar';
 import styles from './Home.module.css';
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 
 const Home = () => {
@@ -15,19 +15,20 @@ const Home = () => {
     semester: '',
     busPoint: '',
     fees: '',
-    payable: '',
-    remainingFees: ''
+    remainingFees: '',
+    totalPayable: ''
   });
   const [allStudents, setAllStudents] = useState([]);
   const [allBoardingPoints, setAllBoardingPoints] = useState([]);
   const [boardingMap, setBoardingMap] = useState({});
   const [codeToFullMap, setCodeToFullMap] = useState({});
-  const [studentDocId, setStudentDocId] = useState('');
+  const [popupMessage, setPopupMessage] = useState('');
+  const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
     const fetchAll = async () => {
       const studentSnapshot = await getDocs(collection(db, 'students'));
-      const studentsData = studentSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const studentsData = studentSnapshot.docs.map(doc => doc.data());
       setAllStudents(studentsData);
 
       const boardingSnapshot = await getDocs(collection(db, 'boardingpoints'));
@@ -41,14 +42,14 @@ const Home = () => {
       });
       const fullNames = boardingData.map(item => item.fullName);
       const fareMap = {};
-      const codeMap = {};
+      const reverseMap = {};
       boardingData.forEach(item => {
         fareMap[item.fullName.toLowerCase()] = item.fare;
-        codeMap[item.code] = item.fullName;
+        reverseMap[item.code] = item.fullName;
       });
       setAllBoardingPoints(fullNames);
       setBoardingMap(fareMap);
-      setCodeToFullMap(codeMap);
+      setCodeToFullMap(reverseMap);
     };
     fetchAll();
   }, []);
@@ -56,13 +57,13 @@ const Home = () => {
   const handleRadioChange = (event) => {
     setSelectedPayment(event.target.value);
     if (event.target.value === "Fully Paid") {
-      setStudentData(prev => ({ ...prev, remainingFees: '' }));
+      setStudentData({ ...studentData, remainingFees: '' });
     }
   };
 
   const handleBusPointChange = (event) => {
     const value = event.target.value;
-    setStudentData(prev => ({ ...prev, busPoint: value }));
+    setStudentData({ ...studentData, busPoint: value });
     const filtered = allBoardingPoints.filter(point =>
       point.toLowerCase().includes(value.toLowerCase())
     );
@@ -70,7 +71,7 @@ const Home = () => {
   };
 
   const handleBusPointSuggestionClick = (value) => {
-    setStudentData(prev => ({ ...prev, busPoint: value }));
+    setStudentData({ ...studentData, busPoint: value });
     setBusPointSuggestions([]);
   };
 
@@ -90,59 +91,88 @@ const Home = () => {
 
   const handleSubmit = () => {
     const student = allStudents.find(s => s.Admissionnumber === admissionNumber);
-    if (student && Object.keys(codeToFullMap).length > 0) {
-      setStudentDocId(student.id);
+    if (student) {
       const fullBusPoint = codeToFullMap[student.busPoint] || '';
+      const totalPayable = student.fullypaid === 1
+        ? student.paid
+        : (parseInt(student.paid || 0) + parseInt(student.remainingFees || 0)).toString();
+
       setStudentData({
         name: student.Name || '',
         department: student.Department || '',
         semester: student.Semester || '',
         busPoint: fullBusPoint,
         fees: student.fees || '',
-        payable: student.paid || '',
-        remainingFees: student.partiallypaid ? (student.remaining || '') : ''
+        remainingFees: student.remainingFees || '',
+        totalPayable: totalPayable
       });
-      if (student.fullypaid) setSelectedPayment('Fully Paid');
-      else if (student.partiallypaid) setSelectedPayment('Partially Paid');
-      else setSelectedPayment('');
+
+      if (student.fullypaid === 1) {
+        setSelectedPayment('Fully Paid');
+      } else if (student.partiallypaid === 1) {
+        setSelectedPayment('Partially Paid');
+      } else {
+        setSelectedPayment('');
+      }
     }
   };
 
   const handleCalculateFee = () => {
     const fare = boardingMap[studentData.busPoint.toLowerCase()];
     if (fare !== undefined) {
-      setStudentData(prev => ({ ...prev, fees: fare, payable: fare }));
+      setStudentData({ ...studentData, fees: fare, totalPayable: fare });
     }
   };
 
   const handleSave = async () => {
-    const { name, department, semester, busPoint, fees, payable, remainingFees } = studentData;
-    if (!name || !department || !semester || !busPoint || !fees || !payable || !selectedPayment) return;
-    if (selectedPayment === 'Partially Paid' && !remainingFees) return;
-    const code = busPoint.split('-')[0];
-    const docRef = doc(db, 'students', studentDocId);
-    const updatedData = {
-      paid: payable,
+    if (
+      !admissionNumber ||
+      !studentData.name ||
+      !studentData.department ||
+      !studentData.semester ||
+      !studentData.busPoint ||
+      !studentData.fees ||
+      !selectedPayment ||
+      (selectedPayment === 'Partially Paid' && !studentData.remainingFees) ||
+      !studentData.totalPayable
+    ) return;
+
+    const busCode = studentData.busPoint.split('-')[0];
+    const payload = {
+      Admissionnumber: admissionNumber,
+      Name: studentData.name,
+      Department: studentData.department,
+      Semester: studentData.semester,
+      busPoint: busCode,
+      fees: studentData.fees,
+      paid: studentData.totalPayable,
       fullypaid: selectedPayment === 'Fully Paid' ? 1 : 0,
       partiallypaid: selectedPayment === 'Partially Paid' ? 1 : 0,
-      remaining: selectedPayment === 'Partially Paid' ? remainingFees : '',
-      busPoint: code,
-      fees: fees
+      remainingFees: selectedPayment === 'Partially Paid' ? studentData.remainingFees : ''
     };
-    await updateDoc(docRef, updatedData);
-    setAdmissionNumber('');
-    setSuggestions([]);
-    setStudentData({
-      name: '',
-      department: '',
-      semester: '',
-      busPoint: '',
-      fees: '',
-      payable: '',
-      remainingFees: ''
-    });
-    setSelectedPayment('');
-    setStudentDocId('');
+
+    try {
+      const sanitizedAdmission = admissionNumber.replaceAll('/', '-');
+      await setDoc(doc(db, 'students', sanitizedAdmission), payload);
+      setPopupMessage('Saved successfully');
+      setShowPopup(true);
+      setAdmissionNumber('');
+      setSelectedPayment('');
+      setStudentData({
+        name: '',
+        department: '',
+        semester: '',
+        busPoint: '',
+        fees: '',
+        remainingFees: '',
+        totalPayable: ''
+      });
+    } catch (error) {
+      setPopupMessage('Error occurred');
+      setShowPopup(true);
+    }
+
+    setTimeout(() => setShowPopup(false), 2000);
   };
 
   return (
@@ -214,10 +244,10 @@ const Home = () => {
           <div className={styles.row}>
             <input
               type="text"
-              placeholder="Total Payable Amount"
+              placeholder="Total Payable Amount After Concession"
               className={styles.inputBox}
-              value={studentData.payable}
-              onChange={(e) => setStudentData(prev => ({ ...prev, payable: e.target.value }))}
+              value={studentData.totalPayable}
+              onChange={(e) => setStudentData({ ...studentData, totalPayable: e.target.value })}
             />
           </div>
 
@@ -245,14 +275,15 @@ const Home = () => {
               placeholder="Remaining Fees"
               className={styles.inputBox}
               value={studentData.remainingFees}
-              onChange={(e) => setStudentData(prev => ({ ...prev, remainingFees: e.target.value }))}
-              disabled={selectedPayment === "Fully Paid"} 
+              onChange={(e) => setStudentData({ ...studentData, remainingFees: e.target.value })}
+              disabled={selectedPayment === "Fully Paid"}
             />
           </div>
 
           <button className={styles.saveButton} onClick={handleSave}>Save</button>
         </div>
       </div>
+      {showPopup && <div className={styles.popup}>{popupMessage}</div>}
     </div>
   );
 };
