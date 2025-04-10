@@ -187,12 +187,10 @@ h2 {
   transform: translateX(-50%);
   background: #fffdf9;
   color: #333;
-  border: 1px solid #f0c18b;
   border-radius: 12px;
   padding: 12px 20px;
   font-size: 15px;
   font-weight: 500;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
   animation: fadeInOut 2s ease-in-out;
   z-index: 9999;
 }

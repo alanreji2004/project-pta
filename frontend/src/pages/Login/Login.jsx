@@ -28,7 +28,7 @@ const Login = () => {
       setShowSuccessBox(true);
       localStorage.setItem('user', JSON.stringify({ email: userData.email }));
       sessionStorage.setItem('isLoggedIn', 'true')     
-      setTimeout(() => navigate('/'), 2000);
+      setTimeout(() => navigate('/'), 1000);
     } else {
       setErrorMessage('Invalid username or password');
     }
