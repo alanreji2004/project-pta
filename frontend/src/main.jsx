@@ -12,10 +12,11 @@ import Settings from "./pages/Settings/Settings";
 import List from "./pages/List/List";
 import BoardingPoints from "./pages/BoardingPoints/BoardingPoints";
 import BusRoutes from "./pages/BusRoutes/BusRoutes";
+import AddStaff from "./pages/AddStaff/AddStaff";
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: "/addstudent",
     element: <Home />,
   },
   {
@@ -27,7 +28,7 @@ const router = createBrowserRouter([
     element: <Settings />,
   },
   {
-    path: "/viewordownload",
+    path: "/",
     element: <List />,
   },
   {
@@ -37,6 +38,10 @@ const router = createBrowserRouter([
   {
     path: "/routes",
     element: <BusRoutes />,
+  },
+  {
+    path: "/addstaff",
+    element: <AddStaff />,
   },
 ]);
 
