@@ -9,6 +9,7 @@ import autoTable from 'jspdf-autotable';
 const List = () => {
   const [routes, setRoutes] = useState([]);
   const [students, setStudents] = useState([]);
+  const [staff, setStaff] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
@@ -22,9 +23,15 @@ const List = () => {
       setStudents(studentData);
     });
 
+    const unsubscribeStaff = onSnapshot(collection(db, 'staff'), (snapshot) => {
+      const staffData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setStaff(staffData);
+    });
+
     return () => {
       unsubscribeRoutes();
       unsubscribeStudents();
+      unsubscribeStaff();
     };
   }, []);
 
@@ -37,17 +44,23 @@ const List = () => {
     return students.filter((student) => bpCodes.includes(student.busPoint));
   };
 
+  const getRouteStaff = (route) => {
+    const bpCodes = route.boardingPoints.map((bp) => bp.code);
+    return staff.filter((stf) => bpCodes.includes(stf.busPoint));
+  };
+
   const generateCSVContent = (withFees) => {
     let content = '';
     filteredRoutes.forEach((route) => {
       const routeStudents = getRouteStudents(route);
-      if (routeStudents.length === 0) return;
+      const routeStaff = getRouteStaff(route);
+      if (routeStudents.length + routeStaff.length === 0) return;
 
       const headers = withFees
-        ? ['Sl No', 'Admission No', 'Name', 'Boarding Point', 'Semester', 'Remaining Fee']
-        : ['Sl No', 'Admission No', 'Name', 'Boarding Point', 'Semester'];
+        ? ['Sl No', 'ID', 'Name', 'Boarding Point', 'Semester/Type', 'Remaining Fee']
+        : ['Sl No', 'ID', 'Name', 'Boarding Point', 'Semester/Type'];
 
-      const rows = routeStudents.map((student, i) =>
+      const studentRows = routeStudents.map((student, i) =>
         withFees
           ? [
               i + 1,
@@ -66,10 +79,31 @@ const List = () => {
             ]
       );
 
+      const staffRows = routeStaff.map((staffMember, i) =>
+        withFees
+          ? [
+              studentRows.length + i + 1,
+              staffMember.id,
+              staffMember.name,
+              staffMember.busPoint,
+              'Staff',
+              staffMember.remainingFees || 0
+            ]
+          : [
+              studentRows.length + i + 1,
+              staffMember.id,
+              staffMember.name,
+              staffMember.busPoint,
+              'Staff'
+            ]
+      );
+
+      const rows = [...studentRows, ...staffRows];
+
       content += `\n${route.routeName}\n`;
       content += headers.join(',') + '\n';
       content += rows.map((r) => r.join(',')).join('\n');
-      content += `\nTotal: ${routeStudents.length} students\n\n`;
+      content += `\nTotal: ${rows.length} entries\n\n`;
     });
 
     return content;
@@ -80,7 +114,7 @@ const List = () => {
     const blob = new Blob([content], { type: 'text/csv' });
     const link = document.createElement('a');
     link.href = window.URL.createObjectURL(blob);
-    link.download = withFees ? 'students_with_fees.csv' : 'StudentsList.csv';
+    link.download = withFees ? 'students_staff_with_fees.csv' : 'StudentsStaffList.csv';
     link.click();
   };
 
@@ -90,7 +124,8 @@ const List = () => {
 
     filteredRoutes.forEach((route, idx) => {
       const routeStudents = getRouteStudents(route);
-      if (routeStudents.length === 0) return;
+      const routeStaff = getRouteStaff(route);
+      if (routeStudents.length + routeStaff.length === 0) return;
 
       if (idx !== 0) {
         doc.addPage();
@@ -102,10 +137,10 @@ const List = () => {
       currentY += 6;
 
       const headers = withFees
-        ? ['Sl No', 'Admission No', 'Name', 'Boarding Point', 'Semester', 'Remaining Fee']
-        : ['Sl No', 'Admission No', 'Name', 'Boarding Point', 'Semester'];
+        ? ['Sl No', 'ID', 'Name', 'Boarding Point', 'Semester/Type', 'Remaining Fee']
+        : ['Sl No', 'ID', 'Name', 'Boarding Point', 'Semester/Type'];
 
-      const rows = routeStudents.map((student, i) =>
+      const studentRows = routeStudents.map((student, i) =>
         withFees
           ? [
               i + 1,
@@ -123,6 +158,27 @@ const List = () => {
               `S${student.Semester || '-'}`
             ]
       );
+
+      const staffRows = routeStaff.map((staffMember, i) =>
+        withFees
+          ? [
+              studentRows.length + i + 1,
+              staffMember.id,
+              staffMember.name,
+              staffMember.busPoint,
+              'Staff',
+              staffMember.remainingFees || 0
+            ]
+          : [
+              studentRows.length + i + 1,
+              staffMember.id,
+              staffMember.name,
+              staffMember.busPoint,
+              'Staff'
+            ]
+      );
+
+      const rows = [...studentRows, ...staffRows];
 
       autoTable(doc, {
         head: [headers],
@@ -137,11 +193,11 @@ const List = () => {
       });
 
       doc.setFontSize(11);
-      doc.text(`Total: ${routeStudents.length} students`, 14, currentY);
+      doc.text(`Total: ${rows.length} entries`, 14, currentY);
       currentY += 10;
     });
 
-    doc.save(withFees ? 'students_with_fees.pdf' : 'StudentsList.pdf');
+    doc.save(withFees ? 'students_staff_with_fees.pdf' : 'StudentsStaffList.pdf');
   };
 
   return (
@@ -164,36 +220,42 @@ const List = () => {
       </div>
       <div className={styles.routesSection}>
         {filteredRoutes.map((route) => {
-          const filteredStudents = getRouteStudents(route);
+          const routeStudents = getRouteStudents(route);
+          const routeStaff = getRouteStaff(route);
+          const all = [
+            ...routeStudents.map((s) => ({ ...s, type: 'student' })),
+            ...routeStaff.map((s) => ({ ...s, type: 'staff' }))
+          ];
+
           return (
             <div key={route.id} className={styles.routeTable}>
               <div className={styles.routeHeader}>
                 <h3 className={styles.routeTitle}>
                   {route.routeName}
                   <div className={styles.routeCount}>
-                    {filteredStudents.length} students
+                    {routeStudents.length} Students | {routeStaff.length} Staff ({all.length} total)
                   </div>
                 </h3>
               </div>
               <div className={styles.tableHeader}>
-                <div>Admission No</div>
+                <div>ADMN NO/STAFF ID</div>
                 <div>Name</div>
                 <div>Boarding Point</div>
                 <div>Semester</div>
                 <div>Remaining Fee</div>
               </div>
-              {filteredStudents.length > 0 ? (
-                filteredStudents.map((student, index) => (
+              {all.length > 0 ? (
+                all.map((entry, index) => (
                   <div key={index} className={styles.tableRow}>
-                    <div>{student.Admissionnumber}</div>
-                    <div>{student.Name}</div>
-                    <div>{student.busPoint}</div>
-                    <div>S{student.Semester || '-'}</div>
-                    <div>₹{student.remainingFees || 0}</div>
+                    <div>{entry.type === 'student' ? entry.Admissionnumber : entry.id}</div>
+                    <div>{entry.Name || entry.name}</div>
+                    <div>{entry.busPoint}</div>
+                    <div>{entry.type === 'student' ? `S${entry.Semester || '-'}` : 'Staff'}</div>
+                    <div>₹{entry.remainingFees || 0}</div>
                   </div>
                 ))
               ) : (
-                <div className={styles.emptyRow}>No students for this route</div>
+                <div className={styles.emptyRow}>No students or staff for this route</div>
               )}
             </div>
           );
