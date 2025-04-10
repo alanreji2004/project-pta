@@ -111,11 +111,17 @@ const Settings = () => {
   const handleDeleteAll = async (key) => {
     updateLoading(key, true);
     updateProgress(key, 0);
-    const snapshot = await getDocs(collection(db, 'students'));
+    const studentSnapshot = await getDocs(collection(db, 'students'));
+    const staffSnapshot = await getDocs(collection(db, 'staff'));
+    const total = studentSnapshot.docs.length + staffSnapshot.docs.length;
     let count = 0;
-    const total = snapshot.docs.length;
-    for (const docSnap of snapshot.docs) {
+    for (const docSnap of studentSnapshot.docs) {
       await deleteDoc(doc(db, 'students', docSnap.id));
+      count++;
+      updateProgress(key, Math.round((count / total) * 100));
+    }
+    for (const docSnap of staffSnapshot.docs) {
+      await deleteDoc(doc(db, 'staff', docSnap.id));
       count++;
       updateProgress(key, Math.round((count / total) * 100));
     }
@@ -126,10 +132,11 @@ const Settings = () => {
   const handlePromoteStudents = async (key) => {
     updateLoading(key, true);
     updateProgress(key, 0);
-    const snapshot = await getDocs(collection(db, 'students'));
+    const studentSnapshot = await getDocs(collection(db, 'students'));
+    const staffSnapshot = await getDocs(collection(db, 'staff'));
     let count = 0;
-    const total = snapshot.docs.length;
-    for (const docSnap of snapshot.docs) {
+    const total = studentSnapshot.docs.length + staffSnapshot.docs.length;
+    for (const docSnap of studentSnapshot.docs) {
       const data = docSnap.data();
       let newSemester = parseInt(data.Semester) + 1;
       if (newSemester > 8) {
@@ -149,6 +156,23 @@ const Settings = () => {
           Semester: String(newSemester),
         });
       }
+      count++;
+      updateProgress(key, Math.round((count / total) * 100));
+    }
+    for (const docSnap of staffSnapshot.docs) {
+      const data = docSnap.data();
+      const {
+        fees,
+        busPoint,
+        fullypaid,
+        paid,
+        partiallypaid,
+        remainingFees,
+        ...cleanedData
+      } = data;
+      await setDoc(doc(db, 'staff', docSnap.id), {
+        ...cleanedData,
+      });
       count++;
       updateProgress(key, Math.round((count / total) * 100));
     }
