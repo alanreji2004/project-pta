@@ -15,6 +15,7 @@ import { Link } from "react-router-dom";
 
 const Settings = () => {
   const [selectedFile, setSelectedFile] = useState(null);
+  const [staffFile, setStaffFile] = useState(null);
   const [progress, setProgress] = useState({});
   const [loading, setLoading] = useState({});
   const [showSuccessBox, setShowSuccessBox] = useState(false);
@@ -58,17 +59,14 @@ const Settings = () => {
     if (!selectedFile) return;
     updateLoading(key, true);
     updateProgress(key, 0);
-
     const data = await readExcel(selectedFile);
     const existingDocs = await getDocs(collection(db, 'students'));
     const existing = existingDocs.docs.map((doc) => doc.data().Admissionnumber);
     const total = data.length;
     let count = 0;
-
     for (const item of data) {
       const { Admissionnumber, Name, Department, Semester } = item;
       if (!Admissionnumber || !Name || !Department || !Semester) continue;
-
       if (!existing.includes(Admissionnumber)) {
         await addDoc(collection(db, 'students'), {
           Admissionnumber,
@@ -77,11 +75,35 @@ const Settings = () => {
           Semester,
         });
       }
-
       count++;
       updateProgress(key, Math.round((count / total) * 100));
     }
+    updateLoading(key, false);
+    showSuccess();
+  };
 
+  const handleAddStaff = async (key) => {
+    if (!staffFile) return;
+    updateLoading(key, true);
+    updateProgress(key, 0);
+    const data = await readExcel(staffFile);
+    const existingDocs = await getDocs(collection(db, 'staff'));
+    const existing = existingDocs.docs.map((doc) => doc.data().id);
+    const total = data.length;
+    let count = 0;
+    for (const item of data) {
+      const { id, name, department } = item;
+      if (!id || !name || !department) continue;
+      if (!existing.includes(id)) {
+        await addDoc(collection(db, 'staff'), {
+          id,
+          name,
+          department,
+        });
+      }
+      count++;
+      updateProgress(key, Math.round((count / total) * 100));
+    }
     updateLoading(key, false);
     showSuccess();
   };
@@ -92,13 +114,11 @@ const Settings = () => {
     const snapshot = await getDocs(collection(db, 'students'));
     let count = 0;
     const total = snapshot.docs.length;
-
     for (const docSnap of snapshot.docs) {
       await deleteDoc(doc(db, 'students', docSnap.id));
       count++;
       updateProgress(key, Math.round((count / total) * 100));
     }
-
     updateLoading(key, false);
     showSuccess();
   };
@@ -109,11 +129,9 @@ const Settings = () => {
     const snapshot = await getDocs(collection(db, 'students'));
     let count = 0;
     const total = snapshot.docs.length;
-
     for (const docSnap of snapshot.docs) {
       const data = docSnap.data();
       let newSemester = parseInt(data.Semester) + 1;
-
       if (newSemester > 8) {
         await deleteDoc(doc(db, 'students', docSnap.id));
       } else {
@@ -126,17 +144,14 @@ const Settings = () => {
           remainingFees,
           ...cleanedData
         } = data;
-
         await setDoc(doc(db, 'students', docSnap.id), {
           ...cleanedData,
           Semester: String(newSemester),
         });
       }
-
       count++;
       updateProgress(key, Math.round((count / total) * 100));
     }
-
     updateLoading(key, false);
     showSuccess();
   };
@@ -161,36 +176,28 @@ const Settings = () => {
     <div>
       <Navbar />
       <div className={styles.settingsContainer}>
-      <div className={styles.content}>
+        <div className={styles.content}>
           <h2>Add Student</h2>
           <Link to="/addstudent">
-            <button className={styles.busButton}>
-              Go To Page
-            </button>
+            <button className={styles.busButton}>Go To Page</button>
           </Link>
         </div>
         <div className={styles.content}>
           <h2>Add Staff</h2>
           <Link to="/addstaff">
-            <button className={styles.busButton}>
-              Go To Page
-            </button>
+            <button className={styles.busButton}>Go To Page</button>
           </Link>
         </div>
         <div className={styles.content}>
           <h2>Add/Edit Boarding points</h2>
           <Link to="/boardingpoints">
-            <button className={styles.busButton}>
-              Go To Page
-            </button>
+            <button className={styles.busButton}>Go To Page</button>
           </Link>
         </div>
         <div className={styles.content}>
           <h2>Add/Edit Bus Routes</h2>
           <Link to="/routes">
-            <button className={styles.busButton}>
-              Go To Page
-            </button>
+            <button className={styles.busButton}>Go To Page</button>
           </Link>
         </div>
         <div className={styles.content}>
@@ -207,6 +214,22 @@ const Settings = () => {
             disabled={loading.newrows}
           >
             {loading.newrows ? `Uploading... ${progress.newrows || 0}%` : 'Upload'}
+          </button>
+        </div>
+        <div className={styles.content}>
+          <h2>Add Staff Details</h2>
+          <input
+            type="file"
+            accept=".xlsx, .xls, .csv"
+            onChange={(e) => setStaffFile(e.target.files[0])}
+            className={styles.fileInput}
+          />
+          <button
+            onClick={() => handleAddStaff('staffupload')}
+            className={styles.uploadButton}
+            disabled={loading.staffupload}
+          >
+            {loading.staffupload ? `Uploading... ${progress.staffupload || 0}%` : 'Upload'}
           </button>
         </div>
         <div className={styles.content}>
@@ -242,7 +265,6 @@ const Settings = () => {
           </button>
         </div>
       </div>
-
       {confirmation.visible && (
         <div className={styles.confirmModal}>
           <div className={styles.confirmBox}>
@@ -254,14 +276,12 @@ const Settings = () => {
           </div>
         </div>
       )}
-
       {showSuccessBox && (
         <div className={styles.popup}>
           Operation Successful!
           <div className={styles.timeline}></div>
         </div>
       )}
-
       {passwordModal.visible && (
         <div className={styles.confirmModal}>
           <div className={styles.confirmBox}>
