@@ -1,15 +1,21 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import styles from "./Navbar.module.css";
-import { Menu } from "lucide-react";
-import logo from "./logo.svg";
+import { useState } from "react"
+import { Link, useNavigate } from "react-router-dom"
+import styles from "./Navbar.module.css"
+import { Menu } from "lucide-react"
+import logo from "./logo.svg"
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false)
+  const navigate = useNavigate()
 
   const toggleMenu = () => {
-    setIsOpen(!isOpen);
-  };
+    setIsOpen(!isOpen)
+  }
+
+  const handleLogout = () => {
+    sessionStorage.removeItem("isLoggedIn")
+    navigate("/login")
+  }
 
   return (
     <nav className={styles.navbar}>
@@ -30,9 +36,9 @@ export default function Navbar() {
           <li><Link to="/addstaff" className={styles.menuItem} onClick={toggleMenu}>Add Staff</Link></li>
           <li><Link to="/" className={styles.menuItem} onClick={toggleMenu}>View/Download list</Link></li>
           <li><Link to="/settings" className={styles.menuItem} onClick={toggleMenu}>Settings</Link></li>
-          <li><Link to="/login" className={styles.menuItem} onClick={toggleMenu}>Logout</Link></li>
+          <li><Link onClick={handleLogout} className={styles.menuItem}>Logout</Link></li>
         </ul>
       </div>
     </nav>
-  );
+  )
 }

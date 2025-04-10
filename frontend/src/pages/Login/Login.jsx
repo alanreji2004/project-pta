@@ -27,6 +27,7 @@ const Login = () => {
     if (userData.email === envEmail && userData.password === envPassword) {
       setShowSuccessBox(true);
       localStorage.setItem('user', JSON.stringify({ email: userData.email }));
+      sessionStorage.setItem('isLoggedIn', 'true')     
       setTimeout(() => navigate('/'), 2000);
     } else {
       setErrorMessage('Invalid username or password');
