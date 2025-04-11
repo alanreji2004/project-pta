@@ -1,8 +1,15 @@
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = sessionStorage.getItem('isLoggedIn') === 'true'
-  return isAuthenticated ? children : <Navigate to="/login" replace />
+  const location = useLocation()
+
+  if (!isAuthenticated) {
+    sessionStorage.setItem('redirectAfterLogin', location.pathname)
+    return <Navigate to="/login" replace />
+  }
+
+  return children
 }
 
 export default ProtectedRoute

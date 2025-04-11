@@ -27,8 +27,10 @@ const Login = () => {
     if (userData.email === envEmail && userData.password === envPassword) {
       setShowSuccessBox(true);
       localStorage.setItem('user', JSON.stringify({ email: userData.email }));
-      sessionStorage.setItem('isLoggedIn', 'true')     
-      setTimeout(() => navigate('/'), 1000);
+      sessionStorage.setItem('isLoggedIn', 'true');
+      const redirectPath = sessionStorage.getItem('redirectAfterLogin') || '/';
+      sessionStorage.removeItem('redirectAfterLogin');
+      setTimeout(() => navigate(redirectPath, { replace: true }), 1000);
     } else {
       setErrorMessage('Invalid username or password');
     }
