@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Html5QrcodeScanner } from 'html5-qrcode'
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore'
 import { db } from '../../firebase'
@@ -11,6 +11,8 @@ const QRScanner = () => {
   const [boardingMap, setBoardingMap] = useState({})
   const [admissionInput, setAdmissionInput] = useState('')
   const [showModal, setShowModal] = useState(false)
+  const [scannerInitialized, setScannerInitialized] = useState(false)
+  const scannerRef = useRef(null)
 
   useEffect(() => {
     const fetchBoardingPoints = async () => {
@@ -26,25 +28,25 @@ const QRScanner = () => {
   }, [])
 
   useEffect(() => {
-    const scanner = new Html5QrcodeScanner('reader', { fps: 10, qrbox: 250 }, false)
-    scanner.render(
-      async (decodedText) => {
-        if (!scannedId) {
-          setScannedId(decodedText)
-          const sSnap = await getDoc(doc(db, 'students', decodedText))
-          if (sSnap.exists()) {
-            setStudent(sSnap.data())
-            setShowModal(true)
+    if (!scannerInitialized && !scannedId) {
+      scannerRef.current = new Html5QrcodeScanner('reader', { fps: 10, qrbox: 250 }, false)
+      scannerRef.current.render(
+        async (decodedText) => {
+          if (!scannedId) {
+            setScannedId(decodedText)
+            const sSnap = await getDoc(doc(db, 'students', decodedText))
+            if (sSnap.exists()) {
+              setStudent(sSnap.data())
+              setShowModal(true)
+            }
+            scannerRef.current.clear()
           }
-          scanner.clear()
-        }
-      },
-      () => {}
-    )
-    return () => {
-      scanner.clear().catch(() => {})
+        },
+        () => {}
+      )
+      setScannerInitialized(true)
     }
-  }, [scannedId])
+  }, [scannerInitialized, scannedId])
 
   const handleAdmissionSearch = async () => {
     const query = admissionInput.trim().toUpperCase()
@@ -64,7 +66,7 @@ const QRScanner = () => {
     setStudent(null)
     setShowModal(false)
     setAdmissionInput('')
-    window.location.reload()
+    setScannerInitialized(false)
   }
 
   const isPaid = student?.fullypaid === 1 || (student?.partiallypaid && student.partiallypaid > 0)
@@ -72,10 +74,8 @@ const QRScanner = () => {
   return (
     <div className={styles.pageContainer}>
       <Navbar />
-
       <div className={styles.centerBox}>
-        <div id="reader" className={styles.qrBox}></div>
-
+        {!showModal && <div id="reader" className={styles.qrBox}></div>}
         <div className={styles.searchBox}>
           <input
             type="text"
@@ -89,7 +89,6 @@ const QRScanner = () => {
           </button>
         </div>
       </div>
-
       {showModal && student && (
         <div className={styles.modalBackdrop}>
           <div className={styles.modalBox}>
@@ -98,41 +97,34 @@ const QRScanner = () => {
                 <img src={student.image} alt="student" className={styles.image} />
               </div>
             )}
-
             <div className={styles.row}>
               <span className={styles.label}>Admission No:</span>
               <span className={styles.value}>{student.Admissionnumber}</span>
             </div>
-
             <div className={styles.row}>
               <span className={styles.label}>Name:</span>
               <span className={styles.value}>{student.Name}</span>
             </div>
-
             <div className={styles.row}>
               <span className={styles.label}>Department:</span>
               <span className={styles.value}>{student.Department}</span>
             </div>
-
             <div className={styles.row}>
               <span className={styles.label}>Semester:</span>
               <span className={styles.value}>{student.Semester}</span>
             </div>
-
             <div className={styles.row}>
               <span className={styles.label}>Boarding Point:</span>
               <span className={styles.value}>
                 {boardingMap[student.busPoint] || student.busPoint}
               </span>
             </div>
-
             <div className={styles.row}>
               <span className={styles.label}>Fee Status:</span>
               <span className={isPaid ? styles.paid : styles.unpaid}>
                 {isPaid ? 'Paid' : 'Not Paid'}
               </span>
             </div>
-
             <button className={styles.button} onClick={handleScanNext}>
               Scan Next
             </button>
