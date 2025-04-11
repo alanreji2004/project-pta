@@ -12,6 +12,7 @@ import BoardingPoints from "./pages/BoardingPoints/BoardingPoints"
 import BusRoutes from "./pages/BusRoutes/BusRoutes"
 import AddStaff from "./pages/AddStaff/AddStaff"
 import ProtectedRoute from "./ProtectedRoute"
+import QRScanner from "./pages/QRScanner/QRScanner"
 
 const router = createBrowserRouter([
   {
@@ -63,6 +64,14 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <AddStaff />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/scanner",
+    element: (
+      <ProtectedRoute>
+        <QRScanner />
       </ProtectedRoute>
     ),
   },
