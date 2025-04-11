@@ -156,7 +156,7 @@ const Home = () => {
 
     try {
       const docId = currentDocId || encodeURIComponent(admissionNumber);
-      await setDoc(doc(db, 'students', docId), payload);
+      await setDoc(doc(db, 'students', docId), payload, { merge:true});
       setPopupMessage('Saved successfully');
       setShowPopup(true);
       setAdmissionNumber('');
