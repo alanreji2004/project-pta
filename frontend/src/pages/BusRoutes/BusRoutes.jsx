@@ -234,28 +234,34 @@ const BusRoutes = () => {
               <div>Time</div>
               <div>Actions</div>
             </div>
-            {route.boardingPoints &&
-              route.boardingPoints.map((point, index) => (
+             {route.boardingPoints &&
+              [...route.boardingPoints]
+                .sort((a, b) => {
+                  if (!a.time) return 1;
+                  if (!b.time) return -1;
+                  return a.time.localeCompare(b.time);
+              })
+              .map((point, index) => (
                 <div key={index} className={styles.tableRow}>
-                  <div>{point.code}</div>
-                  <div>{point.name}</div>
-                  <div>{point.time || '--'}</div>
-                  <div className={styles.actionsCell}>
-                    <button
-                      className={styles.editButton}
-                      onClick={() => openEditModal(route.id, point.code, point.time)}
-                    >
-                      <FaPen size={12} />
-                    </button>
-                    <button
-                      className={styles.removeButton}
-                      onClick={() => handleRemovePoint(route.id, point.code)}
-                    >
-                      <FaMinus size={12} />
-                    </button>
-                  </div>
-                </div>
-              ))}
+                <div>{point.code}</div>
+                <div>{point.name}</div>
+                <div>{point.time || '--'}</div>
+                <div className={styles.actionsCell}>
+                  <button
+                    className={styles.editButton}
+                    onClick={() => openEditModal(route.id, point.code, point.time)}
+                  >
+                  <FaPen size={12} />
+                  </button>
+                <button
+                  className={styles.removeButton}
+                  onClick={() => handleRemovePoint(route.id, point.code)}
+                >
+                <FaMinus size={12} />
+              </button>
+            </div>
+          </div>
+            ))}
           </div>
         ))}
       </div>
