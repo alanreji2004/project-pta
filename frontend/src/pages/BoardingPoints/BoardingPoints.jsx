@@ -20,7 +20,7 @@ const BoardingPoints = () => {
       const data = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
-      }));
+      })).sort((a, b) => a.code.localeCompare(b.code));
       setBoardingPoints(data);
     });
     return () => unsub();
