@@ -177,6 +177,7 @@ const Home = () => {
     }
 
     setTimeout(() => setShowPopup(false), 2000);
+    window.location.reload()
   };
 
   return (
