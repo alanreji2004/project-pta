@@ -138,7 +138,12 @@ const Home = () => {
       !selectedPayment ||
       (selectedPayment === 'Partially Paid' && !studentData.remainingFees) ||
       !studentData.totalPayable
-    ) return;
+    ){
+      setPopupMessage('Please fill in all required fields correctly.');
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 3000);
+      return;
+    };
 
     const busCode = studentData.busPoint.split('-')[0];
     const payload = {
