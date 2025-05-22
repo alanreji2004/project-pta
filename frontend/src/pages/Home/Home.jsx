@@ -75,12 +75,12 @@ const Home = () => {
     setStudentData({ ...studentData, busPoint: value });
     setBusPointSuggestions([]);
   };
-
+  const normalize = (str) => str.replace(/\//g, '').toLowerCase();
   const handleInputChange = (e) => {
     const value = e.target.value;
     setAdmissionNumber(value);
     const filtered = allStudents
-      .filter((s) => s.Admissionnumber.toLowerCase().startsWith(value.toLowerCase()))
+      .filter((s) => normalize(s.Admissionnumber).startsWith(normalize(value)))
       .map((s) => s.Admissionnumber);
     setSuggestions(value ? filtered : []);
   };
