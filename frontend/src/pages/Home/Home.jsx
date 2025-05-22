@@ -25,6 +25,7 @@ const Home = () => {
   const [popupMessage, setPopupMessage] = useState('');
   const [showPopup, setShowPopup] = useState(false);
   const [currentDocId, setCurrentDocId] = useState('');
+  const [loadedAdmissionNumber, setLoadedAdmissionNumber] = useState('');
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -115,7 +116,7 @@ const Home = () => {
       } else {
         setSelectedPayment('');
       }
-
+      setLoadedAdmissionNumber(student.Admissionnumber);
       setCurrentDocId(student.id);
     }
   };
@@ -128,6 +129,12 @@ const Home = () => {
   };
 
   const handleSave = async () => {
+    if (admissionNumber !== loadedAdmissionNumber) {
+      setPopupMessage('Please click Submit after entering a new Admission Number before saving.');
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 3000);
+    return;
+  }
     if (
       !admissionNumber ||
       !studentData.name ||
