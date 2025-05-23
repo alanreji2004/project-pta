@@ -98,7 +98,7 @@ const BoardingPoints = () => {
       <Navbar />
 
       <div className={styles.addBoardingPoint}>
-        <h2 className={styles.sectionTitle}>Add Boarding Point</h2>
+        <h2 className={styles.sectionTitle}>Add New Boarding Point</h2>
         <form onSubmit={handleSubmit} className={styles.inputGroup}>
           <input
             type="text"

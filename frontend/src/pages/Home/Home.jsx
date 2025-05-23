@@ -189,7 +189,9 @@ const Home = () => {
     }
 
     setTimeout(() => setShowPopup(false), 2000);
-    window.location.reload()
+    setTimeout(() => {
+      window.location.reload();
+    }, 1500);
   };
 
   return (
