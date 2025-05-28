@@ -97,7 +97,7 @@ const Home = () => {
       const fullBusPoint = codeToFullMap[student.busPoint] || '';
       const totalPayable = student.fullypaid === 1
         ? student.paid
-        : (parseInt(student.paid || 0) + parseInt(student.remainingFees || 0)).toString();
+        : (parseInt(student.paid || 0)).toString();
 
       setStudentData({
         name: student.Name || '',
@@ -246,7 +246,7 @@ const Home = () => {
                   {busPointSuggestions.map((item, index) => (
                     <li key={index} onClick={() => handleBusPointSuggestionClick(item)}>
                       {item}
-                    </li>
+                    </li> 
                   ))}
                 </ul>
               )}
