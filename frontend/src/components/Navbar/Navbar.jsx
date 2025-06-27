@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect, useRef  } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import styles from "./Navbar.module.css"
 import { Menu } from "lucide-react"
@@ -7,6 +7,7 @@ import logo from "./logo.svg"
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const navigate = useNavigate()
+  const menuRef = useRef(null)
 
   const toggleMenu = () => {
     setIsOpen(!isOpen)
@@ -16,6 +17,19 @@ export default function Navbar() {
     sessionStorage.removeItem("isLoggedIn")
     navigate("/login")
   }
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isOpen && menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsOpen(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [isOpen])
+
 
   return (
     <nav className={styles.navbar}>
@@ -27,7 +41,7 @@ export default function Navbar() {
           <span className={styles.established}>Established by <span className={styles.govt}>Govt. of Kerala</span></span>
         </div>
       </div>
-      <div className={styles.menuContainer}>
+      <div className={styles.menuContainer} ref={menuRef}>
         <button className={styles.menuButton} onClick={toggleMenu} aria-label="Toggle Menu">
           <Menu size={24} />
         </button>
