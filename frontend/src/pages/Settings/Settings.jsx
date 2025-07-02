@@ -23,6 +23,8 @@ const Settings = () => {
   const [passwordModal, setPasswordModal] = useState({ visible: false, action: null, message: '', actionKey: '' });
   const [enteredPassword, setEnteredPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
 
   const readExcel = async (file) => {
     const data = await file.arrayBuffer();
@@ -114,6 +116,14 @@ const Settings = () => {
     const studentSnapshot = await getDocs(collection(db, 'students'));
     const staffSnapshot = await getDocs(collection(db, 'staff'));
     const total = studentSnapshot.docs.length + staffSnapshot.docs.length;
+
+    if (total === 0) {
+      updateLoading(key, false);
+      setErrorMessage('No student or staff records found to delete.');
+      setTimeout(() => setErrorMessage(''), 2200);
+      return;
+    }
+
     let count = 0;
     for (const docSnap of studentSnapshot.docs) {
       await deleteDoc(doc(db, 'students', docSnap.id));
@@ -329,6 +339,12 @@ const Settings = () => {
               }}>Cancel</button>
             </div>
           </div>
+        </div>
+      )}
+      {errorMessage && (
+        <div className={styles.errorBox}>
+          {errorMessage}
+          <div className={styles.timeline}></div>
         </div>
       )}
     </div>
