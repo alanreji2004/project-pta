@@ -79,9 +79,9 @@ const router = createBrowserRouter([
   {
     path: "/vieworaddstudent",
     element: (
-      <ProtectedRoute>
+      // <ProtectedRoute>
         <ViewOrAddStudent />
-      </ProtectedRoute>
+      // </ProtectedRoute>
     ),
   },
 ])
