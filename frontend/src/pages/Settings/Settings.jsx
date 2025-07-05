@@ -261,6 +261,12 @@ const Settings = () => {
           </button>
         </div>
         <div className={styles.content}>
+          <h2>View or Add Individual Staff</h2>
+          <Link to="/vieworaddstaff">
+            <button className={styles.busButton}>Go To Page</button>
+          </Link>
+        </div>
+        <div className={styles.content}>
           <h2>Promote to next Semester</h2>
           <button
             className={styles.promoteButton}

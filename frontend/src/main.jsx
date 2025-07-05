@@ -14,6 +14,7 @@ import AddStaff from "./pages/AddStaff/AddStaff"
 import ProtectedRoute from "./ProtectedRoute"
 import QRScanner from "./pages/QRScanner/QRScanner"
 import ViewOrAddStudent from "./pages/ViewOrAddStudent/ViewOrAddStudent"
+import ViewOrAddStaff from "./pages/ViewOrAddStaff/ViewOrAddStaff"
 
 const router = createBrowserRouter([
   {
@@ -81,6 +82,14 @@ const router = createBrowserRouter([
     element: (
       // <ProtectedRoute>
         <ViewOrAddStudent />
+      // </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/vieworaddstaff",
+    element: (
+      // <ProtectedRoute>
+        <ViewOrAddStaff />
       // </ProtectedRoute>
     ),
   },
