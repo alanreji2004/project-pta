@@ -210,18 +210,6 @@ const Settings = () => {
     <div>
       <Navbar />
       <div className={styles.settingsContainer}>
-        {/* <div className={styles.content}>
-          <h2>Add Student</h2>
-          <Link to="/addstudent">
-            <button className={styles.busButton}>Go To Page</button>
-          </Link>
-        </div>
-        <div className={styles.content}>
-          <h2>Add Staff</h2>
-          <Link to="/addstaff">
-            <button className={styles.busButton}>Go To Page</button>
-          </Link>
-        </div> */}
         <div className={styles.content}>
           <h2>Add/Edit Boarding points</h2>
           <Link to="/boardingpoints">
@@ -249,6 +237,12 @@ const Settings = () => {
           >
             {loading.newrows ? `Uploading... ${progress.newrows || 0}%` : 'Upload'}
           </button>
+        </div>
+        <div className={styles.content}>
+          <h2>View or Add Individual Students</h2>
+          <Link to="/vieworaddstudent">
+            <button className={styles.busButton}>Go To Page</button>
+          </Link>
         </div>
         <div className={styles.content}>
           <h2>Add Staff Details</h2>
