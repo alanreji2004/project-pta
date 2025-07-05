@@ -80,17 +80,17 @@ const router = createBrowserRouter([
   {
     path: "/vieworaddstudent",
     element: (
-      // <ProtectedRoute>
+      <ProtectedRoute>
         <ViewOrAddStudent />
-      // </ProtectedRoute>
+      </ProtectedRoute>
     ),
   },
   {
     path: "/vieworaddstaff",
     element: (
-      // <ProtectedRoute>
+      <ProtectedRoute>
         <ViewOrAddStaff />
-      // </ProtectedRoute>
+      </ProtectedRoute>
     ),
   },
 ])
