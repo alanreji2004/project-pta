@@ -23,6 +23,7 @@ const ViewOrAddStudent = () => {
           id: doc.id,
           ...studentData,
           Admissionnumber: studentData.Admissionnumber?.toUpperCase() || '',
+          Department: studentData.Department?.toUpperCase() || '',
         };
       });
       setStudents(data);
@@ -50,6 +51,7 @@ const ViewOrAddStudent = () => {
     }
 
     Admissionnumber = Admissionnumber.toUpperCase();
+    Department = Department.toUpperCase();
 
     const semesterNumber = Number(Semester);
     if (isNaN(semesterNumber) || semesterNumber < 1 || semesterNumber > 8) {
@@ -85,16 +87,38 @@ const ViewOrAddStudent = () => {
     showToast('Student added successfully!', 'success');
   };
 
+  const downloadCSV = (filterNotPaid = false) => {
+    const headers = ['Admission Number', 'Name', 'Department', 'Semester', 'Fee Status'];
+    const rows = students
+      .filter((student) =>
+        filterNotPaid
+          ? student.fullypaid !== 1 && student.partiallypaid !== 1
+          : true
+      )
+      .map((student) => [
+        student.Admissionnumber,
+        student.Name,
+        student.Department,
+        `S${student.Semester || '-'}`,
+        (student.fullypaid === 1 || student.partiallypaid === 1) ? 'Paid' : 'Not Paid',
+      ]);
+
+    let csvContent = headers.join(',') + '\n' + rows.map((r) => r.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filterNotPaid ? 'students_not_paid.csv' : 'all_students.csv';
+    link.click();
+  };
+
   return (
     <div className={styles.pageContainer}>
       <Navbar />
-
       {toastMessage && (
         <div className={`${styles.toast} ${styles[toastType]}`}>
           {toastMessage}
         </div>
       )}
-
       <div className={styles.formSection}>
         <h2 className={styles.title}>Add Student</h2>
         <form onSubmit={handleSubmit} className={styles.form}>
@@ -137,7 +161,6 @@ const ViewOrAddStudent = () => {
           <button type="submit" className={styles.button}>Add Student</button>
         </form>
       </div>
-
       <div className={styles.tableSection}>
         <h2 className={styles.title}>All Students</h2>
         <div className={styles.tableWrapper}>
@@ -164,6 +187,14 @@ const ViewOrAddStudent = () => {
             <div className={styles.emptyRow}>No students found</div>
           )}
         </div>
+      </div>
+      <div className={styles.downloadButtons}>
+        <button onClick={() => downloadCSV(false)} className={styles.downloadButton}>
+          Download All Students (CSV)
+        </button>
+        <button onClick={() => downloadCSV(true)} className={styles.downloadButton}>
+          Download Not Paid Only (CSV)
+        </button>
       </div>
     </div>
   );
