@@ -23,6 +23,7 @@ const AddStaff = () => {
   const [popupMessage, setPopupMessage] = useState('');
   const [showPopup, setShowPopup] = useState(false);
   const [currentDocId, setCurrentDocId] = useState('');
+  const [loadedStaffId, setLoadedStaffId] = useState('');
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -99,6 +100,7 @@ const AddStaff = () => {
         fees: ''
       });
       setCurrentDocId(staff.docId);
+      setLoadedStaffId(staff.id);
     }
   };
 
@@ -110,13 +112,25 @@ const AddStaff = () => {
   };
 
   const handleSave = async () => {
+    if (staffId !== loadedStaffId) {
+      setPopupMessage('Please click Submit after entering the Staff ID before saving.');
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 3000);
+      return;
+    }
+
     if (
       !staffId ||
       !staffData.name ||
       !staffData.department ||
       !staffData.busPoint ||
       !staffData.fees
-    ) return;
+    ) {
+      setPopupMessage('Please fill in all required fields correctly.');
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 3000);
+      return;
+    }
 
     const busCode = staffData.busPoint.split('-')[0];
     const payload = {
@@ -146,12 +160,14 @@ const AddStaff = () => {
         fees: ''
       });
       setCurrentDocId('');
+      setLoadedStaffId('');
     } catch (error) {
       setPopupMessage('Error occurred');
       setShowPopup(true);
     }
 
     setTimeout(() => setShowPopup(false), 2000);
+    setTimeout(() => window.location.reload(), 1500);
   };
 
   return (
