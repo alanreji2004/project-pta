@@ -1,8 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Cabin:ital,wght@0,400..700;1,400..700&display=swap');
 
+.container {
+  width: 100%;
+}
+
+.navbar {
+  width: 100%;
+}
+
 .formContainer {
   border-radius: 8px;
-  padding-top:2rem ;
+  padding-top: 2rem;
   width: 100%;
   max-width: 600px;
   display: flex;
@@ -36,6 +44,7 @@
   border-radius: 4px;
   font-size: 1rem;
 }
+
 .button, .saveButton {
   padding: 0.75rem;
   border: none;
@@ -46,7 +55,7 @@
   cursor: pointer;
 }
 
-.button:hover {
+.button:hover, .saveButton:hover {
   background-color: #cc2121;
   transition: background-color 0.2s ease-in-out;
 }
@@ -54,12 +63,6 @@
 .saveButton {
   width: 100%;
   margin-top: 10px;
-  background-color: #ff5050;
-}
-
-.saveButton:hover {
-  background-color: #cc2121;
-  transition: background-color 0.2s ease-in-out;
 }
 
 .checkboxLabel {
@@ -103,7 +106,7 @@
 }
 
 .longInput {
-  width: 500px;;
+  width: 500px;
 }
 
 @media (max-width: 600px) {
@@ -123,11 +126,23 @@
     flex-direction: column;
     align-items: stretch;
   }
+
   .longInput {
-    width: 200px;;
+    width: 200px;
   }
-  
 }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
 .popup {
   position: fixed;
   bottom: 20px;
@@ -141,5 +156,17 @@
   transition: opacity 0.3s ease-in-out;
   z-index: 999;
   font-family: "Cabin", serif;
-  font-optical-sizing: auto;
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.popupSuccess {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.popupError {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
 }

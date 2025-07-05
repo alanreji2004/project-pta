@@ -23,6 +23,7 @@ const Home = () => {
   const [boardingMap, setBoardingMap] = useState({});
   const [codeToFullMap, setCodeToFullMap] = useState({});
   const [popupMessage, setPopupMessage] = useState('');
+  const [popupType, setPopupType] = useState('');
   const [showPopup, setShowPopup] = useState(false);
   const [currentDocId, setCurrentDocId] = useState('');
   const [loadedAdmissionNumber, setLoadedAdmissionNumber] = useState('');
@@ -76,7 +77,9 @@ const Home = () => {
     setStudentData({ ...studentData, busPoint: value });
     setBusPointSuggestions([]);
   };
+
   const normalize = (str) => str.replace(/\//g, '').toLowerCase();
+
   const handleInputChange = (e) => {
     const value = e.target.value;
     setAdmissionNumber(value);
@@ -131,10 +134,11 @@ const Home = () => {
   const handleSave = async () => {
     if (admissionNumber !== loadedAdmissionNumber) {
       setPopupMessage('Please click Submit after entering a new Admission Number before saving.');
+      setPopupType('error');
       setShowPopup(true);
       setTimeout(() => setShowPopup(false), 3000);
-    return;
-  }
+      return;
+    }
     if (
       !admissionNumber ||
       !studentData.name ||
@@ -145,12 +149,13 @@ const Home = () => {
       !selectedPayment ||
       (selectedPayment === 'Partially Paid' && !studentData.remainingFees) ||
       !studentData.totalPayable
-    ){
+    ) {
       setPopupMessage('Please fill in all required fields correctly.');
+      setPopupType('error');
       setShowPopup(true);
       setTimeout(() => setShowPopup(false), 3000);
       return;
-    };
+    }
 
     const busCode = studentData.busPoint.split('-')[0];
     const payload = {
@@ -168,8 +173,9 @@ const Home = () => {
 
     try {
       const docId = currentDocId || encodeURIComponent(admissionNumber);
-      await setDoc(doc(db, 'students', docId), payload, { merge:true});
+      await setDoc(doc(db, 'students', docId), payload, { merge: true });
       setPopupMessage('Saved successfully');
+      setPopupType('success');
       setShowPopup(true);
       setAdmissionNumber('');
       setSelectedPayment('');
@@ -185,6 +191,7 @@ const Home = () => {
       setCurrentDocId('');
     } catch (error) {
       setPopupMessage('Error occurred');
+      setPopupType('error');
       setShowPopup(true);
     }
 
@@ -246,7 +253,7 @@ const Home = () => {
                   {busPointSuggestions.map((item, index) => (
                     <li key={index} onClick={() => handleBusPointSuggestionClick(item)}>
                       {item}
-                    </li> 
+                    </li>
                   ))}
                 </ul>
               )}
@@ -297,7 +304,11 @@ const Home = () => {
           <button className={styles.saveButton} onClick={handleSave}>Save</button>
         </div>
       </div>
-      {showPopup && <div className={styles.popup}>{popupMessage}</div>}
+      {showPopup && (
+        <div className={`${styles.popup} ${popupType === 'success' ? styles.popupSuccess : styles.popupError}`}>
+          {popupMessage}
+        </div>
+      )}
     </div>
   );
 };
