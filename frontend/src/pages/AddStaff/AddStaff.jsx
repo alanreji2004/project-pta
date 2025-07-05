@@ -8,15 +8,12 @@ const AddStaff = () => {
   const [staffId, setStaffId] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [busPointSuggestions, setBusPointSuggestions] = useState([]);
-  const [selectedPayment, setSelectedPayment] = useState('');
   const [staffData, setStaffData] = useState({
     name: '',
     department: '',
     semester: '',
     busPoint: '',
-    fees: '',
-    remainingFees: '',
-    totalPayable: ''
+    fees: ''
   });
 
   const [allStaff, setAllStaff] = useState([]);
@@ -90,39 +87,17 @@ const AddStaff = () => {
     setBusPointSuggestions([]);
   };
 
-  const handleRadioChange = (event) => {
-    setSelectedPayment(event.target.value);
-    if (event.target.value === "Fully Paid") {
-      setStaffData(prev => ({ ...prev, remainingFees: '' }));
-    }
-  };
-
   const handleSubmit = () => {
     const staff = allStaff.find(s => s.id === staffId);
     if (staff) {
       const fullBusPoint = codeToFullMap[staff.busPoint] || '';
-      const totalPayable = staff.fullypaid === 1
-        ? staff.paid
-        : (parseInt(staff.paid || 0) + parseInt(staff.remainingFees || 0)).toString();
-
       setStaffData({
         name: staff.name || '',
         department: staff.department || '',
         semester: staff.semester || '',
         busPoint: fullBusPoint,
-        fees: staff.fees || '',
-        remainingFees: staff.remainingFees || '',
-        totalPayable: staff.paid || ''
+        fees: ''
       });
-
-      if (staff.fullypaid === 1) {
-        setSelectedPayment('Fully Paid');
-      } else if (staff.partiallypaid === 1) {
-        setSelectedPayment('Partially Paid');
-      } else {
-        setSelectedPayment('');
-      }
-
       setCurrentDocId(staff.docId);
     }
   };
@@ -130,7 +105,7 @@ const AddStaff = () => {
   const handleCalculateFee = () => {
     const fare = boardingMap[staffData.busPoint.toLowerCase()];
     if (fare !== undefined) {
-      setStaffData({ ...staffData, fees: fare, totalPayable: fare });
+      setStaffData({ ...staffData, fees: fare });
     }
   };
 
@@ -140,10 +115,7 @@ const AddStaff = () => {
       !staffData.name ||
       !staffData.department ||
       !staffData.busPoint ||
-      !staffData.fees ||
-      !selectedPayment ||
-      (selectedPayment === 'Partially Paid' && !staffData.remainingFees) ||
-      !staffData.totalPayable
+      !staffData.fees
     ) return;
 
     const busCode = staffData.busPoint.split('-')[0];
@@ -154,10 +126,10 @@ const AddStaff = () => {
       semester: staffData.semester,
       busPoint: busCode,
       fees: staffData.fees,
-      paid: staffData.totalPayable,
-      fullypaid: selectedPayment === 'Fully Paid' ? 1 : 0,
-      partiallypaid: selectedPayment === 'Partially Paid' ? 1 : 0,
-      remainingFees: selectedPayment === 'Partially Paid' ? staffData.remainingFees : ''
+      paid: staffData.fees,
+      fullypaid: 1,
+      partiallypaid: 0,
+      remainingFees: ''
     };
 
     try {
@@ -166,15 +138,12 @@ const AddStaff = () => {
       setPopupMessage('Saved successfully');
       setShowPopup(true);
       setStaffId('');
-      setSelectedPayment('');
       setStaffData({
         name: '',
         department: '',
         semester: '',
         busPoint: '',
-        fees: '',
-        remainingFees: '',
-        totalPayable: ''
+        fees: ''
       });
       setCurrentDocId('');
     } catch (error) {
@@ -243,45 +212,6 @@ const AddStaff = () => {
             </div>
             <button className={styles.button} onClick={handleCalculateFee}>Calculate Fee</button>
             <input type="text" value={staffData.fees} className={styles.inputBox} readOnly />
-          </div>
-
-          <div className={styles.row}>
-            <input
-              type="text"
-              placeholder="Total Payable Amount After Concession"
-              className={styles.inputBox}
-              value={staffData.totalPayable}
-              onChange={(e) => setStaffData({ ...staffData, totalPayable: e.target.value })}
-            />
-          </div>
-
-          <div className={styles.row}>
-            <label className={styles.checkboxLabel}>
-              <input
-                type="radio"
-                value="Fully Paid"
-                checked={selectedPayment === "Fully Paid"}
-                onChange={handleRadioChange}
-              />
-              Fully Paid
-            </label>
-            <label className={styles.checkboxLabel}>
-              <input
-                type="radio"
-                value="Partially Paid"
-                checked={selectedPayment === "Partially Paid"}
-                onChange={handleRadioChange}
-              />
-              Partially Paid
-            </label>
-            <input
-              type="text"
-              placeholder="Remaining Fees"
-              className={styles.inputBox}
-              value={staffData.remainingFees}
-              onChange={(e) => setStaffData({ ...staffData, remainingFees: e.target.value })}
-              disabled={selectedPayment === "Fully Paid"}
-            />
           </div>
 
           <button className={styles.saveButton} onClick={handleSave}>Save</button>

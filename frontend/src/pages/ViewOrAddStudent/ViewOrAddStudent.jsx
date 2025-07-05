@@ -161,6 +161,14 @@ const ViewOrAddStudent = () => {
           <button type="submit" className={styles.button}>Add Student</button>
         </form>
       </div>
+      <div className={styles.downloadButtons}>
+        <button onClick={() => downloadCSV(false)} className={styles.downloadButton}>
+          Download All Students (CSV)
+        </button>
+        <button onClick={() => downloadCSV(true)} className={styles.downloadButton}>
+          Download Not Paid Only (CSV)
+        </button>
+      </div>
       <div className={styles.tableSection}>
         <h2 className={styles.title}>All Students</h2>
         <div className={styles.tableWrapper}>
@@ -187,14 +195,6 @@ const ViewOrAddStudent = () => {
             <div className={styles.emptyRow}>No students found</div>
           )}
         </div>
-      </div>
-      <div className={styles.downloadButtons}>
-        <button onClick={() => downloadCSV(false)} className={styles.downloadButton}>
-          Download All Students (CSV)
-        </button>
-        <button onClick={() => downloadCSV(true)} className={styles.downloadButton}>
-          Download Not Paid Only (CSV)
-        </button>
       </div>
     </div>
   );
